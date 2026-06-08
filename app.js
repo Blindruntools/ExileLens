@@ -91,6 +91,7 @@ function parseItem(text) {
     // Wipe artifact metadata flags
     cleanedLine = cleanedLine.replace(/\([^)]+\)/g, '').replace(/\{[^}]+\}/g, '');
 
+    // 1. Strict Keyword Verification
     let matched = null;
     for (const def of STAT_DEFINITIONS) {
       if (def.keys.some(k => cleanedLine.includes(k))) {
@@ -99,12 +100,19 @@ function parseItem(text) {
       }
     }
 
+    // Drop line immediately if it has zero recognized PoE stats
     if (!matched) continue;
 
+    // 2. Localized Extraction
     const numbers = [];
     const numReg = /[\d]+(?:\.\d+)?/g;
     let m;
-    while ((m = numReg.exec(cleanedLine)) !== null) { numbers.push(parseFloat(m[0])); }
+    while ((m = numReg.exec(cleanedLine)) !== null) {
+      const numStr = m[0];
+      // Sanity Filter: Drop rogue UI strings or item IDs that aren't real stat tiers
+      if (parseFloat(numStr) > 50000) continue;
+      numbers.push(parseFloat(numStr));
+    }
 
     if (numbers.length === 0) continue;
 
@@ -141,7 +149,7 @@ function updatePreview(textareaId, previewId) {
 
 // ── INPUT ASSIGNMENT LISTENERS ──
 document.getElementById('itemA').addEventListener('input', () => updatePreview('itemA', 'previewA'));
-document.getElementById('itemB').addEventListener('input', () => updatePreview('itemB', 'previewB'));
+document.getElementById('itemB').addEventListener('input', () => updatePreview('previewB', 'previewB'));
 
 // UI Control Resets
 document.getElementById('clearA').addEventListener('click', () => { document.getElementById('itemA').value = ''; updatePreview('itemA', 'previewA'); });
@@ -159,7 +167,7 @@ document.querySelectorAll('.item-image-input').forEach(input => {
     const previewBox = document.getElementById(targetPreviewId);
     
     textarea.value = "Consulting the lens... Extracting stats from image metadata...";
-    previewBox.innerHTML = '<span class="preview-hint" style="color:var(--blue);">Reading image... Please wait.</span>';
+    previewBox.innerHTML = '<span class="preview-hint" style="color:var(--blue); font-weight: 600;">⚡ Reading image... Processing data metrics.</span>';
 
     Tesseract.recognize(file, 'eng', { logger: m => console.log(m) })
       .then(({ data: { text } }) => {
@@ -264,3 +272,27 @@ function renderResults(scoreA, scoreB, statsA, statsB, build) {
   section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   requestAnimationFrame(() => { requestAnimationFrame(() => { document.querySelectorAll('.score-bar-fill').forEach(b => b.style.width = b.dataset.target + '%'); }); });
 }
+
+// ── DYNAMIC INJECTION: SCANNING HOW-TO-USE GUIDE ──
+document.addEventListener("DOMContentLoaded", () => {
+  const buildSection = document.querySelector(".build-section");
+  if (buildSection) {
+    const guideBox = document.createElement("div");
+    guideBox.className = "build-section";
+    guideBox.style.marginTop = "-20px";
+    guideBox.style.marginBottom = "36px";
+    guideBox.style.padding = "16px 20px";
+    guideBox.style.background = "rgba(10, 8, 4, 0.4)";
+    guideBox.style.border = "1px dashed rgba(200, 169, 110, 0.2)";
+    
+    guideBox.innerHTML = `
+      <label class="section-label" style="color: var(--gold); margin-bottom: 6px; font-size: 10px;">
+        📸 OPTIMAL SCREENSHOT SCANNING GUIDE
+      </label>
+      <p style="font-size: 14px; color: var(--text-dim); line-height: 1.5; margin: 0;">
+        For high precision OCR matching, take a <strong style="color: var(--gold-bright);">tight, clear screenshot focusing strictly on the item mods text block</strong>. Crop out peripheral information such as operating system phone headers (clock/battery signals) or game background artifacts to eliminate reading errors.
+      </p>
+    `;
+    buildSection.parentNode.insertBefore(guideBox, buildSection.nextSibling);
+  }
+});
