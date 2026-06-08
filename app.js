@@ -1,6 +1,5 @@
 /* ═══════════════════════════════════════════════════
-   EXILE'S LENS — app_3.js (STRICTLY HARDENED RUNTIME)
-   Item parsing, client-side OCR parsing, and scoring engine
+   EXILE'S LENS — app.js (PRODUCTION DESKTOP & MOBILE RUNTIME)
 ═══════════════════════════════════════════════════ */
 
 // ── STAT DEFINITIONS ──────────────────────────────────────
@@ -27,7 +26,7 @@ const STAT_DEFINITIONS = [
   { keys: ['mana regeneration', 'mana regen'],                           cat: 'defense', label: 'Mana Regen' },
   { keys: ['armour', 'armor'],                                           cat: 'defense', label: 'Armour' },
   { keys: ['evasion'],                                                   cat: 'defense', label: 'Evasion' },
-  { keys: ['energy shield', '\\bes\\b'],                                 cat: 'defense', label: 'Energy Shield' }, // Escaped boundary to prevent random character matching
+  { keys: ['energy shield', '\\bes\\b'],                                 cat: 'defense', label: 'Energy Shield' },
   { keys: ['block chance', 'block'],                                     cat: 'defense', label: 'Block Chance' },
   { keys: ['fire resistance', 'fire res'],                               cat: 'defense', label: 'Fire Res' },
   { keys: ['cold resistance', 'cold res'],                               cat: 'defense', label: 'Cold Res' },
@@ -49,7 +48,7 @@ const STAT_DEFINITIONS = [
   { keys: ['mana', 'mana cost'],                      cat: 'utility',  label: 'Mana' },
 ];
 
-// Structural Sorting: Ensures longest keys match first
+// Structural Setup: Ensure complex structures evaluate ahead of generic ones
 STAT_DEFINITIONS.forEach(def => { def.keys.sort((a, b) => b.length - a.length); });
 STAT_DEFINITIONS.sort((a, b) => {
   const maxA = Math.max(...a.keys.map(k => k.replace(/\\b/g, '').length));
@@ -57,28 +56,7 @@ STAT_DEFINITIONS.sort((a, b) => {
   return maxB - maxA;
 });
 
-// ── BUILD SCALARS ──
-const BUILD_WEIGHTS = {
-  damage:   { damage: 3.0, attribute: 0.6, defense: 0.4, utility: 0.5 },
-  tank:     { damage: 0.5, attribute: 0.6, defense: 3.0, utility: 0.8 },
-  balanced: { damage: 1.5, attribute: 0.8, defense: 1.5, utility: 0.7 },
-};
-
-const BUILD_TAG_DATA = {
-  damage:   [ { text: 'Damage ×3.0', tier: 'high' }, { text: 'Utility ×0.5', tier: 'mid' }, { text: 'Defense ×0.4', tier: 'low' } ],
-  tank:     [ { text: 'Defense ×3.0', tier: 'high' }, { text: 'Utility ×0.8', tier: 'mid' }, { text: 'Damage ×0.5', tier: 'low' } ],
-  balanced: [ { text: 'Damage ×1.5', tier: 'high' }, { text: 'Defense ×1.5', tier: 'high' }, { text: 'Utility ×0.7', tier: 'low' } ],
-};
-
-function renderBuildTags(build) {
-  const tags = BUILD_TAG_DATA[build] || [];
-  document.getElementById('buildTags').innerHTML = tags.map(t => `<span class="build-tag ${t.tier}">${t.text}</span>`).join('');
-}
-
-document.getElementById('buildType').addEventListener('change', function () { renderBuildTags(this.value); });
-renderBuildTags('damage');
-
-// ── HARDENED PARSING ENGINE ──
+// ── STRICT PARSING LAYER ──
 function parseItem(text) {
   if (!text || !text.trim()) return [];
 
@@ -88,27 +66,23 @@ function parseItem(text) {
   for (const line of lines) {
     let cleanedLine = line.toLowerCase().replace(/\([^)]+\)/g, '').replace(/\{[^}]+\}/g, '');
     
-    // Extract numerical elements first
+    // Track numbers safely
     const numbers = [];
     const numReg = /[\d]+(?:\.\d+)?/g;
     let m;
     while ((m = numReg.exec(cleanedLine)) !== null) {
-      const numStr = m[0];
-      if (parseFloat(numStr) > 50000) continue; // Drop rogue UI timestamps or aspect ratios
-      numbers.push(parseFloat(numStr));
+      if (parseFloat(m[0]) > 50000) continue; // Skip wild dimension footprints
+      numbers.push(parseFloat(m[0]));
     }
 
-    // CRITICAL BUGFIX: If there's no actual number on the line, skip completely.
-    // This stops lines like "fries = = = = " from being evaluated as +0 stats.
+    // Skip tracking lines completely lacking numeric scale (stops non-stat ghost text matches)
     if (numbers.length === 0) continue;
 
     let matched = null;
     for (const def of STAT_DEFINITIONS) {
       const matchFound = def.keys.some(k => {
-        // If key already contains regex boundaries, use it directly; otherwise construct word boundary check
         const regexStr = k.startsWith('\\b') ? k : `\\b${k.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`;
-        const rx = new RegExp(regexStr, 'i');
-        return rx.test(cleanedLine);
+        return new RegExp(regexStr, 'i').test(cleanedLine);
       });
 
       if (matchFound) {
@@ -117,7 +91,6 @@ function parseItem(text) {
       }
     }
 
-    // Skip line if it doesn't map directly to a valid explicit modifier word boundary
     if (!matched) continue;
 
     let value = 0;
@@ -140,8 +113,47 @@ function parseItem(text) {
   return found;
 }
 
-function calculateScore(stats, build) {
-  const weights = BUILD_WEIGHTS[build] || BUILD_WEIGHTS.balanced;
+// ── PROFILE CALCULATOR SCALARS ──
+function calculateWeightsFromInput(inputText) {
+  const query = (inputText || '').toLowerCase();
+  
+  // Base default scalars
+  let weights = { damage: 1.0, defense: 1.0, attribute: 1.0, utility: 1.0 };
+  
+  if (!query.trim()) return weights;
+
+  // Real-time text classification matching
+  if (query.includes('damage') || query.includes('monk') || query.includes('crit') || query.includes('spell') || query.includes('dps')) {
+    weights.damage += 1.5;
+    weights.utility += 0.2;
+  }
+  if (query.includes('tank') || query.includes('life') || query.includes('shield') || query.includes('res') || query.includes('druid') || query.includes('slam')) {
+    weights.defense += 1.5;
+    weights.attribute += 0.4;
+  }
+  if (query.includes('speed') || query.includes('mana') || query.includes('flask') || query.includes('cooldown')) {
+    weights.utility += 1.2;
+    weights.damage += 0.3;
+  }
+  
+  return weights;
+}
+
+function renderBuildTags(weights) {
+  const container = document.getElementById('buildTags');
+  if (!container) return;
+
+  let html = '';
+  Object.entries(weights).forEach(([cat, val]) => {
+    let tier = 'low';
+    if (val >= 2.0) tier = 'high';
+    else if (val > 1.0) tier = 'mid';
+    html += `<span class="build-tag ${tier}">${cat.toUpperCase()} ×${val.toFixed(1)}</span>`;
+  });
+  container.innerHTML = html;
+}
+
+function calculateScore(stats, weights) {
   let total = 0;
   for (const stat of stats) { total += stat.value * (weights[stat.category] ?? 1.0); }
   return Math.round(total * 10) / 10;
@@ -159,116 +171,126 @@ function updatePreview(textareaId, previewId) {
   preview.innerHTML = `<div class="stat-chips">${stats.map(s => `<span class="stat-chip" title="${s.raw}">+${s.value}${s.isPercent ? '%' : ''} ${s.label}</span>`).join('')}</div>`;
 }
 
-// ── INPUT ASSIGNMENT LISTENERS ──
-document.getElementById('itemA').addEventListener('input', () => updatePreview('itemA', 'previewA'));
-document.getElementById('itemB').addEventListener('input', () => updatePreview('itemB', 'previewB'));
+// ── DOM SYSTEM SYNC INITIALIZATION ──
+document.addEventListener('DOMContentLoaded', () => {
+  const buildInput = document.getElementById('buildInput');
 
-document.getElementById('clearA').addEventListener('click', () => { document.getElementById('itemA').value = ''; updatePreview('itemA', 'previewA'); });
-document.getElementById('clearB').addEventListener('click', () => { document.getElementById('itemB').value = ''; updatePreview('itemB', 'previewB'); });
+  // Initial build weights calculation loop
+  let currentWeights = calculateWeightsFromInput(buildInput.value);
+  renderBuildTags(currentWeights);
 
-// ── TESSERACT CLIENT IMAGE OCR IMPLEMENTATION (STRICT AFFIX SANITATION) ──
-document.querySelectorAll('.item-image-input').forEach(input => {
-  input.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    const targetTextareaId = this.dataset.target;
-    const targetPreviewId = targetTextareaId === 'itemA' ? 'previewA' : 'previewB';
-    if (!file) return;
+  buildInput.addEventListener('input', () => {
+    currentWeights = calculateWeightsFromInput(buildInput.value);
+    renderBuildTags(currentWeights);
+  });
 
-    const textarea = document.getElementById(targetTextareaId);
-    const previewBox = document.getElementById(targetPreviewId);
-    
-    textarea.value = "Consulting the lens... Extracting stats from image metadata...";
-    previewBox.innerHTML = '<span class="preview-hint" style="color:var(--blue); font-weight: 600;">⚡ Reading image... Processing data metrics.</span>';
+  // Structural Input Listeners
+  document.getElementById('itemA').addEventListener('input', () => updatePreview('itemA', 'previewA'));
+  document.getElementById('itemB').addEventListener('input', () => updatePreview('itemB', 'previewB'));
 
-    Tesseract.recognize(file, 'eng', { logger: m => console.log(m) })
-      .then(({ data: { text } }) => {
+  document.getElementById('clearA').addEventListener('click', () => { document.getElementById('itemA').value = ''; updatePreview('itemA', 'previewA'); });
+  document.getElementById('clearB').addEventListener('click', () => { document.getElementById('itemB').value = ''; updatePreview('itemB', 'previewB'); });
+
+  // ── FIX: MOBILE FILE DISPATCH INTERFACES ──
+  document.querySelectorAll('.scan-trigger-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const inputId = btn.getAttribute('data-target');
+      const inputEl = document.getElementById(inputId);
+      if (inputEl) inputEl.click();
+    });
+  });
+
+  // TESSERACT OCR DISPATCH CONTROL
+  document.querySelectorAll('.item-image-input').forEach(input => {
+    input.addEventListener('change', async function(e) {
+      const file = e.target.files[0];
+      const targetTextareaId = this.getAttribute('data-textarea');
+      const targetPreviewId = targetTextareaId === 'itemA' ? 'previewA' : 'previewB';
+      if (!file) return;
+
+      const textarea = document.getElementById(targetTextareaId);
+      const previewBox = document.getElementById(targetPreviewId);
+      
+      textarea.value = "Consulting the lens... Extracting stats from image metadata...";
+      previewBox.innerHTML = '<span class="preview-hint" style="color:var(--blue); font-weight: 600;">⚡ Reading image... Processing data metrics.</span>';
+
+      try {
+        const { data: { text } } = await Tesseract.recognize(file, 'eng', {
+          logger: m => {
+            if (m.status === 'recognizing' && previewBox) {
+              previewBox.innerHTML = `<span class="preview-hint" style="color:var(--gold);">🔮 Deciphering: ${Math.floor(m.progress * 100)}%</span>`;
+            }
+          }
+        });
+
         if (!text || !text.trim()) {
           textarea.value = "";
           previewBox.innerHTML = '<span class="preview-hint" style="color:var(--red);">No readable text found.</span>';
           return;
         }
 
-        let fixedRawText = text
-          .replace(/[lI|]/g, '1')    
-          .replace(/o/gi, '0')       
-          .replace(/§/g, '5');       
-
-        const rawLines = fixedRawText.split('\n').map(l => l.trim()).filter(Boolean);
+        let fixedText = text.replace(/[lI|]/g, '1').replace(/o/gi, '0').replace(/§/g, '5');
+        const rawLines = fixedText.split('\n').map(l => l.trim()).filter(Boolean);
         const validatedLines = [];
 
         for (const line of rawLines) {
           let lowerLine = line.toLowerCase();
-
-          // Global bypass flags for game template lines that shouldn't build explicitly
-          if (lowerLine.includes('attacks per second:') || 
-              lowerLine.includes('critical strike chance:') ||
-              lowerLine.includes('physical damage:') || 
-              lowerLine.includes('elemental damage:') || 
-              lowerLine.includes('item class:') || 
-              lowerLine.includes('rarity:') ||
-              lowerLine.includes('requirements:') ||
-              lowerLine.includes('item level:')) {
+          if (lowerLine.includes('attacks per second:') || lowerLine.includes('critical strike chance:') ||
+              lowerLine.includes('physical damage:') || lowerLine.includes('elemental damage:') || 
+              lowerLine.includes('item class:') || lowerLine.includes('rarity:') ||
+              lowerLine.includes('requirements:') || lowerLine.includes('item level:')) {
             continue;
           }
 
-          // Run strict temporary check through regex engine validation mapping before pushing to field
-          const testParse = parseItem(line);
-          if (testParse.length > 0) {
-            let cleanOutputLine = line.replace(/\([^)]+\)/g, '').replace(/\{[^}]+\}/g, '').trim();
-            if (cleanOutputLine) {
-              validatedLines.push(cleanOutputLine);
-            }
+          if (parseItem(line).length > 0) {
+            let cleanLine = line.replace(/\([^)]+\)/g, '').replace(/\{[^}]+\}/g, '').trim();
+            if (cleanLine) validatedLines.push(cleanLine);
           }
         }
 
-        if (validatedLines.length > 0) {
-          textarea.value = validatedLines.join('\n');
-        } else {
-          textarea.value = "⚠️ No matching explicit modifiers discovered.\n\nRaw scan read:\n" + text.substring(0, 60) + "...";
-        }
-        
+        textarea.value = validatedLines.length > 0 ? validatedLines.join('\n') : "⚠️ No matching explicit modifiers discovered.";
         updatePreview(targetTextareaId, targetPreviewId);
-      })
-      .catch(err => {
+
+      } catch (err) {
+        console.error(err);
         textarea.value = "";
         previewBox.innerHTML = '<span class="preview-hint" style="color:var(--red);">Processing error. Ensure clear lighting.</span>';
-        console.error(err);
-      });
+      } finally {
+        input.value = '';
+      }
+    });
+  });
+
+  // EVALUATION COMPUTE LINK
+  document.getElementById('compareBtn').addEventListener('click', () => {
+    const textA = document.getElementById('itemA').value.trim();
+    const textB = document.getElementById('itemB').value.trim();
+
+    if (!textA && !textB) {
+      const btn = document.getElementById('compareBtn');
+      btn.style.animation = 'none'; btn.offsetHeight; btn.style.animation = 'shake 0.4s ease';
+      return;
+    }
+
+    const statsA = parseItem(textA);
+    const statsB = parseItem(textB);
+
+    const scoreA = textA ? calculateScore(statsA, currentWeights) : 0;
+    const scoreB = textB ? calculateScore(statsB, currentWeights) : 0;
+
+    renderResults(scoreA, scoreB, statsA, statsB, currentWeights);
   });
 });
 
-// ── EVALUATION PIPELINE ──
-document.getElementById('compareBtn').addEventListener('click', compareItems);
-
-function compareItems() {
-  const textA = document.getElementById('itemA').value.trim();
-  const textB = document.getElementById('itemB').value.trim();
-  const build = document.getElementById('buildType').value;
-
-  if (!textA && !textB) { shakeButton(); return; }
-
-  const statsA = parseItem(textA);
-  const statsB = parseItem(textB);
-
-  const scoreA = textA ? calculateScore(statsA, build) : 0;
-  const scoreB = textB ? calculateScore(statsB, build) : 0;
-
-  renderResults(scoreA, scoreB, statsA, statsB, build);
-}
-
-function shakeButton() {
-  const btn = document.getElementById('compareBtn');
-  btn.style.animation = 'none'; btn.offsetHeight; btn.style.animation = 'shake 0.4s ease';
-}
-
-// ── FIXED OUTPUT PRESENTATION & MATH CALCULATION LAYER ──
-function renderResults(scoreA, scoreB, statsA, statsB, build) {
+// ── FIXED GRAPHIC LAYOUT CALCULATION GENERATOR ──
+function renderResults(scoreA, scoreB, statsA, statsB, weights) {
   const section = document.getElementById('resultsSection');
   const inner   = document.getElementById('resultsInner');
 
   let diffPct = 0, diffLabel = '', diffClass = 'neutral', verdictClass = 'sidegrade', verdictIcon = '◈', verdictText = 'Sidegrade', verdictDesc = 'Marginal matrix variation.';
 
-  // CRITICAL MATH BOUNDARY BUGFIX: Protects layout against division by zero and extreme values
+  // PROTECTION LAUNCHER AGAINST DIV-BY-ZERO RUNAWAY VALUES
   if (scoreA === 0 && scoreB === 0) {
     diffPct = 0; diffLabel = 'no change'; verdictText = 'Null Core'; verdictDesc = 'No readable parameters discovered.';
   } else if (scoreA === 0 && scoreB > 0) {
@@ -295,8 +317,6 @@ function renderResults(scoreA, scoreB, statsA, statsB, build) {
   const barB = Math.round((scoreB / maxScore) * 100);
   const winnerA = scoreA >= scoreB;
 
-  const weights = BUILD_WEIGHTS[build] || BUILD_WEIGHTS.balanced;
-
   inner.innerHTML = `
     <div class="verdict-banner ${verdictClass}">
       <div class="verdict-icon">${verdictIcon}</div>
@@ -304,59 +324,25 @@ function renderResults(scoreA, scoreB, statsA, statsB, build) {
       <div class="verdict-diff"><div class="diff-pct ${diffClass}">${diffPct > 0 ? diffPct + '%' : '—'}</div><div class="diff-label">${diffLabel}</div></div>
     </div>
     <div class="scores-grid">
-      <!-- CURRENT ITEM CARD -->
       <div class="score-card">
         <div class="score-card-label">Current Item</div><div class="score-value">${scoreA.toFixed(1)}</div>
         <div class="score-bar-track"><div class="score-bar-fill ${winnerA ? 'winner' : ''}" style="width:0%" data-target="${barA}"></div></div>
         <div class="stat-breakdown">
-          ${statsA.map(s => `
-            <div class="breakdown-row">
-              <span class="breakdown-stat">${s.label}</span>
-              <span class="breakdown-val">${s.raw && s.raw.trim().startsWith('+') ? '+' : ''}${s.value}${s.isPercent ? '%' : ''}</span>
-            </div>
-          `).join('') || '<div class="preview-hint">No explicit mods tracked.</div>'}
+          ${statsA.map(s => `<div class="breakdown-row"><span class="breakdown-stat">${s.label}</span><span class="breakdown-val">${s.value}${s.isPercent ? '%' : ''}</span></div>`).join('') || '<div class="preview-hint">No explicit mods tracked.</div>'}
         </div>
       </div>
-      <!-- MARKET ITEM CARD -->
       <div class="score-card">
         <div class="score-card-label">Market Item</div><div class="score-value">${scoreB.toFixed(1)}</div>
         <div class="score-bar-track"><div class="score-bar-fill ${!winnerA ? 'winner' : ''}" style="width:0%" data-target="${barB}"></div></div>
         <div class="stat-breakdown">
-          ${statsB.map(s => `
-            <div class="breakdown-row">
-              <span class="breakdown-stat">${s.label}</span>
-              <span class="breakdown-val">${s.raw && s.raw.trim().startsWith('+') ? '+' : ''}${s.value}${s.isPercent ? '%' : ''}</span>
-            </div>
-          `).join('') || '<div class="preview-hint">No explicit mods tracked.</div>'}
+          ${statsB.map(s => `<div class="breakdown-row"><span class="breakdown-stat">${s.label}</span><span class="breakdown-val">${s.value}${s.isPercent ? '%' : ''}</span></div>`).join('') || '<div class="preview-hint">No explicit mods tracked.</div>'}
         </div>
       </div>
     </div>
-    <div class="weight-legend"><span class="weight-legend-title">Active Weights:</span>${Object.entries(weights).map(([c, w]) => `<span class="build-tag ${w >= 2 ? 'high' : w >= 1 ? 'mid' : 'low'}">${c} ×${w}</span>`).join('')}</div>
+    <div class="weight-legend"><span class="weight-legend-title">Active Weights:</span>${Object.entries(weights).map(([c, w]) => `<span class="build-tag ${w >= 2 ? 'high' : w >= 1 ? 'mid' : 'low'}">${c} ×${w.toFixed(1)}</span>`).join('')}</div>
   `;
 
   section.classList.add('visible');
-  section.scrollIntoView({ behavior: 'smooth', block: 'nearest');
+  section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   requestAnimationFrame(() => { requestAnimationFrame(() => { document.querySelectorAll('.score-bar-fill').forEach(b => b.style.width = b.dataset.target + '%'); }); });
 }
-
-// ── HOOK SCANNING PERFORMANCE GUIDE ON INIT ──
-document.addEventListener("DOMContentLoaded", () => {
-  const buildSection = document.querySelector(".build-section");
-  if (buildSection) {
-    const guideBox = document.createElement("div");
-    guideBox.className = "build-section";
-    guideBox.style.marginTop = "-20px";
-    guideBox.style.marginBottom = "36px";
-    guideBox.style.padding = "16px 20px";
-    guideBox.style.background = "rgba(10, 8, 4, 0.4)";
-    guideBox.style.border = "1px dashed rgba(200, 169, 110, 0.2)";
-    
-    guideBox.innerHTML = `
-      <label class="section-label" style="color: var(--gold); margin-bottom: 6px; font-size: 10px;">📸 OPTIMAL SCREENSHOT SCANNING GUIDE</label>
-      <p style="font-size: 14px; color: var(--text-dim); line-height: 1.5; margin: 0;">
-        For precise OCR matching, clip your images directly around the item affix panel. Removing phone UI elements or noisy inventory borders guarantees flawless tracking metrics.
-      </p>
-    `;
-    buildSection.parentNode.insertBefore(guideBox, buildSection.nextSibling);
-  }
-});
