@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exile's Lens — PoE2 Item Comparator</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+  <!-- Tesseract.js Mobile OCR Engine Engine -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+<body>
+
+  <!-- Ambient Fluid Assets -->
+  <div class="bg-runes" aria-hidden="true">
+    <div class="rune r1">ᚦ</div>
+    <div class="rune r2">ᚨ</div>
+    <div class="rune r3">ᚱ</div>
+    <div class="rune r4">ᛏ</div>
+    <div class="rune r5">ᛗ</div>
+    <div class="rune r6">ᚢ</div>
+  </div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="bg-mist" aria-hidden="true"></div>
+
+  <div class="container">
+
+    <!-- HEADER -->
+    <header class="site-header">
+      <div class="header-ornament left" aria-hidden="true">
+        <svg width="80" height="2"><line x1="0" y1="1" x2="80" y2="1" stroke="var(--gold)" stroke-width="1" opacity="0.6"/></svg>
+        <div class="diamond"></div>
+      </div>
+      <div class="header-text">
+        <p class="header-eyebrow">Path of Exile 2</p>
+        <h1>Exile's Lens</h1>
+        <p class="header-sub">Item Comparison Oracle</p>
+      </div>
+      <div class="header-ornament right" aria-hidden="true">
+        <div class="diamond"></div>
+        <svg width="80" height="2"><line x1="0" y1="1" x2="80" y2="1" stroke="var(--gold)" stroke-width="1" opacity="0.6"/></svg>
+      </div>
+    </header>
+
+    <!-- BUILD SELECTOR -->
+    <section class="section build-section">
+      <label class="section-label" for="buildType">
+        <span class="label-icon">⚙</span> Build Archetype
+      </label>
+      <div class="select-wrapper">
+        <select id="buildType">
+          <option value="damage">⚔ Damage Build — Maximize DPS</option>
+          <option value="tank">🛡 Tank Build — Maximize Survivability</option>
+          <option value="balanced">⚖ Balanced Build — All-Rounder</option>
+        </select>
+        <div class="select-arrow">▾</div>
+      </div>
+      <div class="build-tags" id="buildTags">
+        <!-- filled by JS -->
+      </div>
+    </section>
+
+    <!-- ITEM INPUTS -->
+    <section class="items-grid">
+
+      <!-- PANEL A -->
+      <div class="item-panel" id="panelA">
+        <div class="panel-header">
+          <span class="panel-rune" aria-hidden="true">ᚦ</span>
+          <div>
+            <div class="panel-title">Current Item</div>
+            <div class="panel-sub">What you're wearing now</div>
+          </div>
+          
+          <div class="panel-controls">
+            <label class="upload-btn" title="Upload Screenshot">
+              📷 Scan Image
+              <input type="file" accept="image/*" class="item-image-input" data-target="itemA" style="display:none;">
+            </label>
+            <button class="clear-btn" id="clearA" type="button" title="Clear Text">✖ Clear</button>
+          </div>
+
+          <div class="item-socket" aria-hidden="true">
+            <div class="socket-gem"></div>
+          </div>
+        </div>
+        <textarea
+          id="itemA"
+          class="item-textarea"
+          placeholder="+80% Increased Physical Damage&#10;+50 to Maximum Mana&#10;+10% Attack Speed&#10;+30 to Strength&#10;+120 Maximum Life"
+          spellcheck="false"
+        ></textarea>
+        <div class="stat-preview" id="previewA">
+          <span class="preview-hint">Paste stats or tap Scan Image ↑</span>
+        </div>
+      </div>
+
+      <!-- VS DIVIDER -->
+      <div class="vs-divider" aria-hidden="true">
+        <div class="vs-line"></div>
+        <div class="vs-circle">VS</div>
+        <div class="vs-line"></div>
+      </div>
+
+      <!-- PANEL B -->
+      <div class="item-panel" id="panelB">
+        <div class="panel-header">
+          <span class="panel-rune" aria-hidden="true">ᛗ</span>
+          <div>
+            <div class="panel-title">Market Item</div>
+            <div class="panel-sub">The one you're considering</div>
+          </div>
+
+          <div class="panel-controls">
+            <label class="upload-btn" title="Upload Screenshot">
+              📷 Scan Image
+              <input type="file" accept="image/*" class="item-image-input" data-target="itemB" style="display:none;">
+            </label>
+            <button class="clear-btn" id="clearB" type="button" title="Clear Text">✖ Clear</button>
+          </div>
+
+          <div class="item-socket" aria-hidden="true">
+            <div class="socket-gem gem-blue"></div>
+          </div>
+        </div>
+        <textarea
+          id="itemB"
+          class="item-textarea"
+          placeholder="+120% Increased Physical Damage&#10;+70 to Maximum Mana&#10;+15% Attack Speed&#10;+20 to Strength&#10;+90 Maximum Life"
+          spellcheck="false"
+        ></textarea>
+        <div class="stat-preview" id="previewB">
+          <span class="preview-hint">Paste stats or tap Scan Image ↑</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- COMPARE BUTTON -->
+    <div class="compare-row">
+      <button class="compare-btn" id="compareBtn">
+        <span class="btn-glyph" aria-hidden="true">◆</span>
+        Compare Items
+        <span class="btn-glyph" aria-hidden="true">◆</span>
+      </button>
+    </div>
+
+    <!-- RESULTS -->
+    <section class="results-section" id="resultsSection">
+      <div class="results-inner" id="resultsInner">
+        <!-- filled by JS -->
+      </div>
+    </section>
+
+    <!-- FOOTER & DONATE -->
+    <footer class="site-footer">
+      <div class="footer-sep" aria-hidden="true"></div>
+      
+      <div style="margin-bottom: 24px;">
+        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=lee.finelines@gmail.com&item_name=Exile's+Lens+Development&currency_code=USD" 
+           target="_blank" 
+           style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--font-display); font-size: 12px; color: var(--gold); border: 1px solid var(--gold-dim); padding: 8px 18px; background: rgba(20, 16, 9, 0.6); border-radius: var(--radius); letter-spacing: 0.15em; transition: all 0.3s; box-shadow: 0 0 8px rgba(200, 169, 110, 0.05);"
+           onmouseover="this.style.borderColor='var(--gold)'; this.style.boxShadow='0 0 15px var(--gold-glow)'; this.style.color='var(--gold-bright)';"
+           onmouseout="this.style.borderColor='var(--gold-dim)'; this.style.boxShadow='0 0 8px rgba(200, 169, 110, 0.05)'; this.style.color='var(--gold)';">
+          <span style="font-size: 14px;">🪙</span> SUPPORT THE ORACLE
+        </a>
+      </div>
+
+      <p>Exile's Lens • Unofficial Fan Tool • Not affiliated with Grinding Gear Games</p>
+    </footer>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
