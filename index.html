@@ -26,18 +26,10 @@
 
     <!-- HEADER -->
     <header class="site-header">
-      <div class="header-ornament left" aria-hidden="true">
-        <svg width="80" height="2"><line x1="0" y1="1" x2="80" y2="1" stroke="var(--gold)" stroke-width="1" opacity="0.6"/></svg>
-        <div class="diamond"></div>
-      </div>
       <div class="header-text">
         <p class="header-eyebrow">Path of Exile 2</p>
         <h1>Exile's Lens</h1>
         <p class="header-sub">Item Comparison Oracle</p>
-      </div>
-      <div class="header-ornament right" aria-hidden="true">
-        <div class="diamond"></div>
-        <svg width="80" height="2"><line x1="0" y1="1" x2="80" y2="1" stroke="var(--gold)" stroke-width="1" opacity="0.6"/></svg>
       </div>
     </header>
 
@@ -51,14 +43,10 @@
           type="text" 
           id="buildInput" 
           placeholder="e.g., I do cold damage, lightning monk, crit spell casting, tanky slam druid..." 
-          style="width: 100%; background: var(--bg-field); border: 1px solid var(--gold-dim); border-radius: var(--radius); color: var(--text); font-family: var(--font-body); font-size: 18px; padding: 12px 16px; outline: none; transition: var(--transition);"
-          onfocus="this.style.borderColor='var(--gold)'; this.style.boxShadow='0 0 10px var(--gold-glow)';"
-          onblur="this.style.borderColor='var(--gold-dim)'; this.style.boxShadow='none';"
+          style="width: 100%; background: var(--bg-field); border: 1px solid var(--gold-dim); border-radius: var(--radius); color: var(--text); font-family: var(--font-body); font-size: 18px; padding: 12px 16px; outline: none;"
           spellcheck="false"
         />
-        <div class="build-tags" id="buildTags">
-          <!-- Populated dynamically via JS -->
-        </div>
+        <div class="build-tags" id="buildTags"></div>
       </div>
     </section>
 
@@ -68,16 +56,13 @@
       <!-- CURRENT ITEM CONTAINER -->
       <div class="item-panel" id="panelA">
         <div class="panel-header">
-          <span class="panel-rune" aria-hidden="true">ᚦ</span>
           <div class="panel-text-block">
             <div class="panel-title">Current Item</div>
             <div class="panel-sub">What you're wearing now</div>
           </div>
           
           <div class="panel-actions">
-            <button type="button" class="action-btn scan-trigger-btn" data-target="itemA-file">
-              📸 SCAN IMAGE
-            </button>
+            <button type="button" class="action-btn scan-trigger-btn" data-target="itemA-file">📸 SCAN IMAGE</button>
             <input type="file" id="itemA-file" class="item-image-input" data-textarea="itemA" accept="image/*" capture="environment" style="display: none;" />
             <button type="button" class="action-btn clear-btn" id="clearA">CLEAR</button>
           </div>
@@ -86,12 +71,7 @@
             <div class="socket-gem"></div>
           </div>
         </div>
-        <textarea
-          id="itemA"
-          class="item-textarea"
-          placeholder="+80% Increased Physical Damage&#10;+50 to Maximum Mana&#10;+10% Attack Speed&#10;+30 to Strength&#10;+120 Maximum Life"
-          spellcheck="false"
-        ></textarea>
+        <textarea id="itemA" class="item-textarea" placeholder="+80% Increased Physical Damage&#10;+50 to Maximum Mana" spellcheck="false"></textarea>
         <div class="stat-preview" id="previewA">
           <span class="preview-hint">Paste item stats or tap Scan Image ↑</span>
         </div>
@@ -106,16 +86,13 @@
       <!-- MARKET ITEM CONTAINER -->
       <div class="item-panel" id="panelB">
         <div class="panel-header">
-          <span class="panel-rune" aria-hidden="true">ᛗ</span>
           <div class="panel-text-block">
             <div class="panel-title">Market Item</div>
             <div class="panel-sub">The one you're considering</div>
           </div>
 
           <div class="panel-actions">
-            <button type="button" class="action-btn scan-trigger-btn" data-target="itemB-file">
-              📸 SCAN IMAGE
-            </button>
+            <button type="button" class="action-btn scan-trigger-btn" data-target="itemB-file">📸 SCAN IMAGE</button>
             <input type="file" id="itemB-file" class="item-image-input" data-textarea="itemB" accept="image/*" capture="environment" style="display: none;" />
             <button type="button" class="action-btn clear-btn" id="clearB">CLEAR</button>
           </div>
@@ -124,12 +101,7 @@
             <div class="socket-gem gem-blue"></div>
           </div>
         </div>
-        <textarea
-          id="itemB"
-          class="item-textarea"
-          placeholder="+120% Increased Physical Damage&#10;+70 to Maximum Mana&#10;+15% Attack Speed&#10;+20 to Strength&#10;+90 Maximum Life"
-          spellcheck="false"
-        ></textarea>
+        <textarea id="itemB" class="item-textarea" placeholder="+120% Increased Physical Damage&#10;+70 to Maximum Mana" spellcheck="false"></textarea>
         <div class="stat-preview" id="previewB">
           <span class="preview-hint">Paste item stats or tap Scan Image ↑</span>
         </div>
@@ -148,25 +120,17 @@
 
     <!-- RESULTS -->
     <section class="results-section" id="resultsSection">
-      <div class="results-inner" id="resultsInner">
-        <!-- Filled dynamically by JS -->
-      </div>
+      <div class="results-inner" id="resultsInner"></div>
     </section>
 
     <!-- FOOTER -->
     <footer class="site-footer">
       <div class="footer-sep" aria-hidden="true"></div>
-      
       <div style="margin-bottom: 24px;">
-        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=lee.finelines@gmail.com&item_name=Exile's+Lens+Development&currency_code=USD" 
-           target="_blank" 
-           style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--font-display); font-size: 12px; color: var(--gold); border: 1px solid var(--gold-dim); padding: 8px 18px; background: rgba(20, 16, 9, 0.6); border-radius: var(--radius); letter-spacing: 0.15em; transition: all 0.3s; box-shadow: 0 0 8px rgba(200, 169, 110, 0.05);"
-           onmouseover="this.style.borderColor='var(--gold)'; this.style.boxShadow='0 0 15px var(--gold-glow)'; this.style.color='var(--gold-bright)';"
-           onmouseout="this.style.borderColor='var(--gold-dim)'; this.style.boxShadow='0 0 8px rgba(200, 169, 110, 0.05)'; this.style.color='var(--gold)';">
-          <span style="font-size: 14px;">🪙</span> SUPPORT THE ORACLE
+        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=lee.finelines@gmail.com&item_name=Exile's+Lens+Development&currency_code=USD" target="_blank" style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--font-display); font-size: 12px; color: var(--gold); border: 1px solid var(--gold-dim); padding: 8px 18px; background: rgba(20, 16, 9, 0.6); border-radius: var(--radius); letter-spacing: 0.15em;">
+          <span>🪙</span> SUPPORT THE ORACLE
         </a>
       </div>
-
       <p>Exile's Lens • Unofficial Fan Tool • Not affiliated with Grinding Gear Games</p>
     </footer>
 
