@@ -1,5 +1,5 @@
 /**
- * EXILE'S LENS — Upgrade Item Comapre Tool
+ * EXILE'S LENS — High-Precision Local Character Scanner
  */
 
 const POE2_MODIFIER_DICTIONARY = {
