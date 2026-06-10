@@ -1,9 +1,10 @@
 /**
- * EXILE'S LENS — Contextual Client-Side Scanning Matrix
+ * EXILE'S LENS — Exact Item Contextual Scanning Matrix
  */
 
 const POE2_CONTEXTUAL_DATABASE = {
-  weapons: {
+  // --- WEAPONS CATEGORY BREAKDOWNS ---
+  "one-handed-swords": {
     implicits: [
       { id: 'crit_chance', label: 'Base Critical Hit Chance %', keywords: ['critical', 'chance'], weight: 1.5 },
       { id: 'attack_speed', label: 'Attacks Per Second', keywords: ['attacks', 'second'], weight: 3.0 }
@@ -16,11 +17,43 @@ const POE2_CONTEXTUAL_DATABASE = {
       { id: 'cold_dmg', label: 'Adds to Cold Damage', keywords: ['added', 'cold', 'damage'], weight: 2.5 }
     ],
     utility: [
-      { id: 'stun_duration', label: '% Increased Stun Duration', keywords: ['stun', 'duration', 'increased'], weight: 1.0 },
+      { id: 'accuracy_rating', label: '+ to Accuracy Rating', keywords: ['accuracy', 'rating'], weight: 1.0 },
+      { id: 'phys_dmg_pct', label: '% Increased Physical Damage', keywords: ['increased', 'physical', 'damage'], weight: 2.5 }
+    ]
+  },
+  "quarterstaffs": {
+    implicits: [
+      { id: 'block_chance', label: '% Chance to Block Attacks', keywords: ['chance', 'block'], weight: 2.0 },
+      { id: 'attack_speed', label: 'Attacks Per Second', keywords: ['attacks', 'second'], weight: 3.0 }
+    ],
+    damage_metrics: [
+      { id: 'phys_dmg_min', label: 'Min Physical Damage', keywords: ['physical', 'damage'], weight: 2.0 },
+      { id: 'phys_dmg_max', label: 'Max Physical Damage', keywords: ['physical', 'damage'], weight: 2.0 },
+      { id: 'fire_dmg', label: 'Adds to Fire Damage', keywords: ['added', 'fire', 'damage'], weight: 2.5 }
+    ],
+    utility: [
+      { id: 'crit_chance_pct', label: '% Increased Critical Strike Chance', keywords: ['increased', 'critical', 'strike', 'chance'], weight: 2.0 },
       { id: 'cast_speed', label: '% Increased Cast Speed', keywords: ['cast', 'speed', 'increased'], weight: 2.5 }
     ]
   },
-  armor: {
+  "bows": {
+    implicits: [
+      { id: 'attack_speed', label: 'Attacks Per Second', keywords: ['attacks', 'second'], weight: 3.0 }
+    ],
+    damage_metrics: [
+      { id: 'phys_dmg_min', label: 'Min Physical Damage', keywords: ['physical', 'damage'], weight: 2.0 },
+      { id: 'phys_dmg_max', label: 'Max Physical Damage', keywords: ['physical', 'damage'], weight: 2.0 },
+      { id: 'lightning_dmg', label: 'Adds to Lightning Damage', keywords: ['added', 'lightning', 'damage'], weight: 2.5 },
+      { id: 'cold_dmg', label: 'Adds to Cold Damage', keywords: ['added', 'cold', 'damage'], weight: 2.5 }
+    ],
+    utility: [
+      { id: 'proj_speed', label: '% Increased Projectile Speed', keywords: ['projectile', 'speed'], weight: 1.5 },
+      { id: 'phys_dmg_pct', label: '% Increased Physical Damage', keywords: ['increased', 'physical', 'damage'], weight: 2.5 }
+    ]
+  },
+
+  // --- ARMOR CATEGORY BREAKDOWNS ---
+  "body-armour": {
     implicits: [
       { id: 'inc_attr_req', label: '% Increased Attribute Requirements', keywords: ['attribute', 'requirement', 'increased'], weight: -1.0 },
       { id: 'base_armour', label: 'Base Armour Value', keywords: ['armour'], weight: 1.0 },
@@ -32,48 +65,105 @@ const POE2_CONTEXTUAL_DATABASE = {
       { id: 'energy_shield', label: '+ to Energy Shield', keywords: ['energy', 'shield'], weight: 1.5 }
     ],
     resources: [
-      { id: 'max_life', label: '+ to Maximum Life', keywords: ['maximum', 'life'], weight: 2.0 },
+      { id: 'max_life', label: '+ to Maximum Life', keywords: ['maximum', 'life'], weight: 2.5 },
       { id: 'spirit', label: '+ to Spirit', keywords: ['spirit'], weight: 4.0 }
     ]
   },
-  jewelry: {
+  "boots": {
     implicits: [
-      { id: 'base_all_res', label: '+% to all Elemental Resistances', keywords: ['all', 'elemental', 'resistances'], weight: 3.0 },
-      { id: 'base_mana', label: '+ to Maximum Mana', keywords: ['maximum', 'mana'], weight: 1.0 }
+      { id: 'base_armour', label: 'Base Armour Value', keywords: ['armour'], weight: 1.0 },
+      { id: 'base_evasion', label: 'Base Evasion Value', keywords: ['evasion'], weight: 1.0 }
+    ],
+    defences: [
+      { id: 'armour_pct', label: '% Increased Armour', keywords: ['increased', 'armour'], weight: 2.0 },
+      { id: 'evasion_pct', label: '% Increased Evasion', keywords: ['increased', 'evasion'], weight: 2.0 }
+    ],
+    utility: [
+      { id: 'move_speed', label: '% Increased Movement Speed', keywords: ['movement', 'speed'], weight: 5.5 },
+      { id: 'max_life', label: '+ to Maximum Life', keywords: ['maximum', 'life'], weight: 2.0 },
+      { id: 'fire_res', label: '% Fire Resistance', keywords: ['fire', 'resistance'], weight: 1.2 }
+    ]
+  },
+  "shields": {
+    implicits: [
+      { id: 'block_chance', label: '% Chance to Block Attacks', keywords: ['chance', 'block'], weight: 3.5 },
+      { id: 'base_armour', label: 'Base Armour Value', keywords: ['armour'], weight: 1.0 }
+    ],
+    defences: [
+      { id: 'armour_pct', label: '% Increased Armour', keywords: ['increased', 'armour'], weight: 2.0 },
+      { id: 'all_res', label: '+% to all Elemental Resistances', keywords: ['all', 'elemental', 'resistances'], weight: 3.0 }
+    ],
+    utility: [
+      { id: 'block_recovery', label: '% Increased Block Recovery', keywords: ['block', 'recovery'], weight: 1.0 },
+      { id: 'max_life', label: '+ to Maximum Life', keywords: ['maximum', 'life'], weight: 2.0 }
+    ]
+  },
+
+  // --- JEWELRY CATEGORY BREAKDOWNS ---
+  "amulets": {
+    implicits: [
+      { id: 'base_all_res', label: '+% to all Elemental Resistances', keywords: ['all', 'elemental', 'resistances'], weight: 3.0 }
     ],
     attributes: [
+      { id: 'all_stats', label: '+ to All Attributes', keywords: ['all', 'attributes'], weight: 4.5 },
       { id: 'strength', label: '+ to Strength', keywords: ['strength'], weight: 1.5 },
       { id: 'dexterity', label: '+ to Dexterity', keywords: ['dexterity'], weight: 1.5 },
-      { id: 'intelligence', label: '+ to Intelligence', keywords: ['intelligence'], weight: 1.5 },
-      { id: 'all_stats', label: '+ to All Attributes', keywords: ['all', 'attributes'], weight: 4.5 }
+      { id: 'intelligence', label: '+ to Intelligence', keywords: ['intelligence'], weight: 1.5 }
+    ],
+    utility: [
+      { id: 'crit_multiplier', label: '+% to Global Critical Strike Multiplier', keywords: ['critical', 'strike', 'multiplier'], weight: 2.5 },
+      { id: 'max_life', label: '+ to Maximum Life', keywords: ['maximum', 'life'], weight: 2.0 }
+    ]
+  },
+  "rings": {
+    implicits: [
+      { id: 'base_mana', label: '+ to Maximum Mana', keywords: ['maximum', 'mana'], weight: 1.0 },
+      { id: 'fire_res_implicit', label: '% Fire Resistance Implicit', keywords: ['fire', 'resistance'], weight: 1.2 }
+    ],
+    utility: [
+      { id: 'max_life', label: '+ to Maximum Life', keywords: ['maximum', 'life'], weight: 2.0 },
+      { id: 'mana_regen', label: '% Increased Mana Regeneration Rate', keywords: ['mana', 'regeneration'], weight: 1.5 }
+    ],
+    resists: [
+      { id: 'lightning_res', label: '% Lightning Resistance', keywords: ['lightning', 'resistance'], weight: 1.2 },
+      { id: 'cold_res', label: '% Cold Resistance', keywords: ['cold', 'resistance'], weight: 1.2 },
+      { id: 'chaos_res', label: '% Chaos Resistance', keywords: ['chaos', 'resistance'], weight: 2.5 }
+    ]
+  },
+  "belts": {
+    implicits: [
+      { id: 'base_life', label: '+ to Maximum Life Implicit', keywords: ['maximum', 'life'], weight: 2.0 }
+    ],
+    utility: [
+      { id: 'max_life', label: '+ to Maximum Life Explicit', keywords: ['maximum', 'life'], weight: 2.0 },
+      { id: 'flask_charges', label: '% Increased Flask Charges Gained', keywords: ['flask', 'charges', 'gained'], weight: 1.0 }
     ],
     resists: [
       { id: 'fire_res', label: '% Fire Resistance', keywords: ['fire', 'resistance'], weight: 1.2 },
-      { id: 'cold_res', label: '% Cold Resistance', keywords: ['cold', 'resistance'], weight: 1.2 },
-      { id: 'lightning_res', label: '% Lightning Resistance', keywords: ['lightning', 'resistance'], weight: 1.2 },
-      { id: 'chaos_res', label: '% Chaos Resistance', keywords: ['chaos', 'resistance'], weight: 2.5 }
+      { id: 'cold_res', label: '% Cold Resistance', keywords: ['cold', 'resistance'], weight: 1.2 }
     ]
   }
 };
 
-let currentContext = 'weapons'; // Default fallback state matrix
+let currentContext = 'one-handed-swords'; // Precise tracking baseline default initialization state
 
+// INITIALIZATION PIPELINE
 document.addEventListener('DOMContentLoaded', () => {
   rebuildContextualPanels();
   initActionListeners();
-  setupContextTabs();
+  setupContextTabs(); 
 });
 
 function setupContextTabs() {
   document.querySelectorAll('.type-tab').forEach(tab => {
-    tab.addEventListener('click', (e) => {
+    tab.addEventListener('click', () => {
       document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       
       currentContext = tab.getAttribute('data-type');
       rebuildContextualPanels();
       
-      // Clear previous comparison layouts safely
+      // Clean display structures
       document.getElementById('resultsSection').classList.remove('visible');
     });
   });
@@ -93,7 +183,7 @@ function renderActiveMenu(containerId, prefix) {
   Object.keys(activePool).forEach(cat => {
     const section = document.createElement('div');
     section.className = 'attribute-category-group';
-    section.innerHTML = `<div class="category-group-title">${cat.toUpperCase()}</div>`;
+    section.innerHTML = `<div class="category-group-title">${cat.toUpperCase().replace('_', ' ')}</div>`;
 
     activePool[cat].forEach(mod => {
       const row = document.createElement('div');
@@ -144,7 +234,7 @@ function initActionListeners() {
             });
             processContextualTokens(res.data.text, targetPrefix);
           } catch (err) {
-            console.error("Local Runtime Capture Error: ", err);
+            console.error("Local Capture Fault Exception Encountered: ", err);
           } finally {
             indicator.innerText = '📸 SCAN IMAGE';
           }
@@ -175,7 +265,6 @@ function filterBackgroundNoise(imageElement) {
     const g = pixels[i + 1];
     const b = pixels[i + 2];
 
-    // High fidelity capture mapping PoE2 text color styles
     const matchesFontProfile = (r > 130 && g > 115 && b > 85) || (b > 175 && r < 115) || (r > 180 && g > 170 && b > 150);
 
     const binaryValue = matchesFontProfile ? 255 : 0;
@@ -186,15 +275,11 @@ function filterBackgroundNoise(imageElement) {
   return canvas.toDataURL('image/png');
 }
 
-/**
- * Split Token Logic based on Active Component Matrix Selection State Context
- */
 function processContextualTokens(rawText, prefix) {
   const lines = rawText.toLowerCase().split('\n').map(l => l.trim()).filter(l => l.length > 2);
   const activePool = POE2_CONTEXTUAL_DATABASE[currentContext];
 
   lines.forEach(line => {
-    // Look for numbers or ranges (e.g., 25-45 or +12)
     const numbersFound = line.match(/(\d+)/g);
     if (!numbersFound) return;
 
@@ -211,7 +296,6 @@ function processContextualTokens(rawText, prefix) {
         if (keywordHits >= Math.ceil(mod.keywords.length * 0.7)) {
           const uiTargetNode = document.getElementById(`${prefix}_${mod.id}`);
           if (uiTargetNode) {
-            // Handle damage ranges on weapons cleanly by filling min/max sequentially
             if (mod.id === 'phys_dmg_min' && numbersFound.length >= 2) {
               uiTargetNode.value = parseInt(numbersFound[0], 10);
               const maxNode = document.getElementById(`${prefix}_phys_dmg_max`);
@@ -282,12 +366,12 @@ function displayAnalysis(sA, sB, metrics) {
   inner.innerHTML = `
     <div class="verdict-banner" style="border-left: 4px solid var(--gold);">
       <div>
-        <div class="verdict-label">Dynamic Asset Evaluation Done [${currentContext.toUpperCase()}]</div>
-        <div class="verdict-desc">Item values calculated accurately using targeted contextual filters.</div>
+        <div class="verdict-label">Exact Base Evaluation Complete [${currentContext.toUpperCase()}]</div>
+        <div class="verdict-desc">Item metrics mapped accurately using class-specific layout constraints.</div>
       </div>
       <div class="verdict-diff">
         <div class="diff-pct ${pctClass}">${totalShift >= 0 ? '+' : ''}${totalShift.toFixed(1)}%</div>
-        <div class="diff-label">Calculated Differential</div>
+        <div class="diff-label">Calculated Shift</div>
       </div>
     </div>
     <div class="score-card">
