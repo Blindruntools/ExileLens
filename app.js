@@ -1,53 +1,101 @@
 /**
- * EXILE'S LENS — High-Precision Local Character Scanner
+ * EXILE'S LENS — Contextual Client-Side Scanning Matrix
  */
 
-const POE2_MODIFIER_DICTIONARY = {
-  implicits: [
-    { id: 'inc_attr_req', label: '% Increased Attribute Requirements', keywords: ['attribute', 'requirement', 'increased'], weight: -1.0 },
-    { id: 'base_armour', label: 'Base Armour Value', keywords: ['armour'], weight: 1.0 },
-    { id: 'base_evasion', label: 'Base Evasion Value', keywords: ['evasion'], weight: 1.0 }
-  ],
-  defences: [
-    { id: 'armour_pct', label: '% Increased Armour', keywords: ['increased', 'armour'], weight: 2.0 },
-    { id: 'evasion_pct', label: '% Increased Evasion', keywords: ['increased', 'evasion'], weight: 2.0 },
-    { id: 'energy_shield', label: '+ to Energy Shield', keywords: ['energy', 'shield'], weight: 1.5 }
-  ],
-  attributes: [
-    { id: 'strength', label: '+ to Strength', keywords: ['strength'], weight: 1.5 },
-    { id: 'dexterity', label: '+ to Dexterity', keywords: ['dexterity'], weight: 1.5 },
-    { id: 'intelligence', label: '+ to Intelligence', keywords: ['intelligence'], weight: 1.5 },
-    { id: 'all_stats', label: '+ to All Attributes', keywords: ['all', 'attributes'], weight: 4.5 }
-  ],
-  resists: [
-    { id: 'fire_res', label: '% Fire Resistance', keywords: ['fire', 'resistance'], weight: 1.2 },
-    { id: 'cold_res', label: '% Cold Resistance', keywords: ['cold', 'resistance'], weight: 1.2 },
-    { id: 'lightning_res', label: '% Lightning Resistance', keywords: ['lightning', 'resistance'], weight: 1.2 },
-    { id: 'chaos_res', label: '% Chaos Resistance', keywords: ['chaos', 'resistance'], weight: 2.5 }
-  ],
-  resources: [
-    { id: 'max_life', label: '+ to Maximum Life', keywords: ['maximum', 'life'], weight: 2.0 },
-    { id: 'max_mana', label: '+ to Maximum Mana', keywords: ['maximum', 'mana'], weight: 1.5 },
-    { id: 'spirit', label: '+ to Spirit', keywords: ['spirit'], weight: 4.0 }
-  ]
+const POE2_CONTEXTUAL_DATABASE = {
+  weapons: {
+    implicits: [
+      { id: 'crit_chance', label: 'Base Critical Hit Chance %', keywords: ['critical', 'chance'], weight: 1.5 },
+      { id: 'attack_speed', label: 'Attacks Per Second', keywords: ['attacks', 'second'], weight: 3.0 }
+    ],
+    damage_metrics: [
+      { id: 'phys_dmg_min', label: 'Min Physical Damage', keywords: ['physical', 'damage'], weight: 2.0 },
+      { id: 'phys_dmg_max', label: 'Max Physical Damage', keywords: ['physical', 'damage'], weight: 2.0 },
+      { id: 'lightning_dmg', label: 'Adds to Lightning Damage', keywords: ['added', 'lightning', 'damage'], weight: 2.5 },
+      { id: 'fire_dmg', label: 'Adds to Fire Damage', keywords: ['added', 'fire', 'damage'], weight: 2.5 },
+      { id: 'cold_dmg', label: 'Adds to Cold Damage', keywords: ['added', 'cold', 'damage'], weight: 2.5 }
+    ],
+    utility: [
+      { id: 'stun_duration', label: '% Increased Stun Duration', keywords: ['stun', 'duration', 'increased'], weight: 1.0 },
+      { id: 'cast_speed', label: '% Increased Cast Speed', keywords: ['cast', 'speed', 'increased'], weight: 2.5 }
+    ]
+  },
+  armor: {
+    implicits: [
+      { id: 'inc_attr_req', label: '% Increased Attribute Requirements', keywords: ['attribute', 'requirement', 'increased'], weight: -1.0 },
+      { id: 'base_armour', label: 'Base Armour Value', keywords: ['armour'], weight: 1.0 },
+      { id: 'base_evasion', label: 'Base Evasion Value', keywords: ['evasion'], weight: 1.0 }
+    ],
+    defences: [
+      { id: 'armour_pct', label: '% Increased Armour', keywords: ['increased', 'armour'], weight: 2.0 },
+      { id: 'evasion_pct', label: '% Increased Evasion', keywords: ['increased', 'evasion'], weight: 2.0 },
+      { id: 'energy_shield', label: '+ to Energy Shield', keywords: ['energy', 'shield'], weight: 1.5 }
+    ],
+    resources: [
+      { id: 'max_life', label: '+ to Maximum Life', keywords: ['maximum', 'life'], weight: 2.0 },
+      { id: 'spirit', label: '+ to Spirit', keywords: ['spirit'], weight: 4.0 }
+    ]
+  },
+  jewelry: {
+    implicits: [
+      { id: 'base_all_res', label: '+% to all Elemental Resistances', keywords: ['all', 'elemental', 'resistances'], weight: 3.0 },
+      { id: 'base_mana', label: '+ to Maximum Mana', keywords: ['maximum', 'mana'], weight: 1.0 }
+    ],
+    attributes: [
+      { id: 'strength', label: '+ to Strength', keywords: ['strength'], weight: 1.5 },
+      { id: 'dexterity', label: '+ to Dexterity', keywords: ['dexterity'], weight: 1.5 },
+      { id: 'intelligence', label: '+ to Intelligence', keywords: ['intelligence'], weight: 1.5 },
+      { id: 'all_stats', label: '+ to All Attributes', keywords: ['all', 'attributes'], weight: 4.5 }
+    ],
+    resists: [
+      { id: 'fire_res', label: '% Fire Resistance', keywords: ['fire', 'resistance'], weight: 1.2 },
+      { id: 'cold_res', label: '% Cold Resistance', keywords: ['cold', 'resistance'], weight: 1.2 },
+      { id: 'lightning_res', label: '% Lightning Resistance', keywords: ['lightning', 'resistance'], weight: 1.2 },
+      { id: 'chaos_res', label: '% Chaos Resistance', keywords: ['chaos', 'resistance'], weight: 2.5 }
+    ]
+  }
 };
 
+let currentContext = 'weapons'; // Default fallback state matrix
+
 document.addEventListener('DOMContentLoaded', () => {
-  renderPanels('menuA', 'panelA');
-  renderPanels('menuB', 'panelB');
+  rebuildContextualPanels();
   initActionListeners();
+  setupContextTabs();
 });
 
-function renderPanels(containerId, prefix) {
+function setupContextTabs() {
+  document.querySelectorAll('.type-tab').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      
+      currentContext = tab.getAttribute('data-type');
+      rebuildContextualPanels();
+      
+      // Clear previous comparison layouts safely
+      document.getElementById('resultsSection').classList.remove('visible');
+    });
+  });
+}
+
+function rebuildContextualPanels() {
+  renderActiveMenu('menuA', 'panelA');
+  renderActiveMenu('menuB', 'panelB');
+}
+
+function renderActiveMenu(containerId, prefix) {
   const target = document.getElementById(containerId);
   target.innerHTML = '';
 
-  Object.keys(POE2_MODIFIER_DICTIONARY).forEach(cat => {
+  const activePool = POE2_CONTEXTUAL_DATABASE[currentContext];
+
+  Object.keys(activePool).forEach(cat => {
     const section = document.createElement('div');
     section.className = 'attribute-category-group';
     section.innerHTML = `<div class="category-group-title">${cat.toUpperCase()}</div>`;
 
-    POE2_MODIFIER_DICTIONARY[cat].forEach(mod => {
+    activePool[cat].forEach(mod => {
       const row = document.createElement('div');
       row.className = 'attribute-menu-row';
       row.innerHTML = `
@@ -80,25 +128,23 @@ function initActionListeners() {
       if (!file) return;
       const targetPrefix = input.id.includes('itemA') ? 'panelA' : 'panelB';
       const indicator = input.previousElementSibling;
-      indicator.innerText = '⏳ SHARPENING FILTER...';
+      indicator.innerText = '⏳ SHARPENING FILTERS...';
 
       const reader = new FileReader();
       reader.onload = function(event) {
         const img = new Image();
         img.onload = async function() {
-          // Process contrast matrix through canvas viewport layers
           const processedDataUrl = filterBackgroundNoise(img);
           indicator.innerText = '🔮 RUNNING LEXER...';
 
           try {
-            // Apply strict character constraints to prevent symbol tracking failures
             const res = await Tesseract.recognize(processedDataUrl, 'eng', {
-              tessedit_char_whitelist: '0123456789+- %abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:',
+              tessedit_char_whitelist: '0123456789+- %abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-:',
               tessedit_pageseg_mode: '6' 
             });
-            processCleanTextTokens(res.data.text, targetPrefix);
+            processContextualTokens(res.data.text, targetPrefix);
           } catch (err) {
-            console.error("Local Scan Exception: ", err);
+            console.error("Local Runtime Capture Error: ", err);
           } finally {
             indicator.innerText = '📸 SCAN IMAGE';
           }
@@ -114,10 +160,6 @@ function initActionListeners() {
   document.getElementById('compareBtn').addEventListener('click', runComparisonEngine);
 }
 
-/**
- * High-Contrast Binarization Matrix Filter
- * Strips game art background blending, turning font characters stark white and backgrounds pure black.
- */
 function filterBackgroundNoise(imageElement) {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
@@ -133,7 +175,7 @@ function filterBackgroundNoise(imageElement) {
     const g = pixels[i + 1];
     const b = pixels[i + 2];
 
-    // Detect PoE2 specific color bounds (White, Magic Blue, Rare Gold text values)
+    // High fidelity capture mapping PoE2 text color styles
     const matchesFontProfile = (r > 130 && g > 115 && b > 85) || (b > 175 && r < 115) || (r > 180 && g > 170 && b > 150);
 
     const binaryValue = matchesFontProfile ? 255 : 0;
@@ -145,19 +187,19 @@ function filterBackgroundNoise(imageElement) {
 }
 
 /**
- * Tokenization Rule Processor
+ * Split Token Logic based on Active Component Matrix Selection State Context
  */
-function processCleanTextTokens(rawText, prefix) {
-  const blocks = rawText.toLowerCase().split('\n').map(line => line.trim()).filter(line => line.length > 2);
+function processContextualTokens(rawText, prefix) {
+  const lines = rawText.toLowerCase().split('\n').map(l => l.trim()).filter(l => l.length > 2);
+  const activePool = POE2_CONTEXTUAL_DATABASE[currentContext];
 
-  blocks.forEach(line => {
-    // Isolate value modifiers (+54, 120, -10)
-    const numericRegexMatch = line.match(/([-+]?\d+)/);
-    if (!numericRegexMatch) return;
-    const cleanInteger = parseInt(numericRegexMatch[0], 10);
+  lines.forEach(line => {
+    // Look for numbers or ranges (e.g., 25-45 or +12)
+    const numbersFound = line.match(/(\d+)/g);
+    if (!numbersFound) return;
 
-    Object.keys(POE2_MODIFIER_DICTIONARY).forEach(cat => {
-      POE2_MODIFIER_DICTIONARY[cat].forEach(mod => {
+    Object.keys(activePool).forEach(cat => {
+      activePool[cat].forEach(mod => {
         let keywordHits = 0;
         
         mod.keywords.forEach(word => {
@@ -166,11 +208,17 @@ function processCleanTextTokens(rawText, prefix) {
           }
         });
 
-        // Verify total hit threshold overrides to guarantee precision
         if (keywordHits >= Math.ceil(mod.keywords.length * 0.7)) {
           const uiTargetNode = document.getElementById(`${prefix}_${mod.id}`);
           if (uiTargetNode) {
-            uiTargetNode.value = Math.abs(cleanInteger);
+            // Handle damage ranges on weapons cleanly by filling min/max sequentially
+            if (mod.id === 'phys_dmg_min' && numbersFound.length >= 2) {
+              uiTargetNode.value = parseInt(numbersFound[0], 10);
+              const maxNode = document.getElementById(`${prefix}_phys_dmg_max`);
+              if (maxNode) maxNode.value = parseInt(numbersFound[1], 10);
+            } else if (mod.id !== 'phys_dmg_max') {
+              uiTargetNode.value = parseInt(numbersFound[0], 10);
+            }
           }
         }
       });
@@ -178,7 +226,6 @@ function processCleanTextTokens(rawText, prefix) {
   });
 }
 
-// Intercepts character drops from image noise artifacts
 function computeLevenshteinDistance(s1, s2) {
   let costs = [];
   for (let i = 0; i <= s1.length; i++) {
@@ -207,11 +254,12 @@ function resetAll(prefix) {
 function runComparisonEngine() {
   let scoreA = 0, scoreB = 0;
   let summary = [];
+  const activePool = POE2_CONTEXTUAL_DATABASE[currentContext];
 
-  Object.keys(POE2_MODIFIER_DICTIONARY).forEach(cat => {
-    POE2_MODIFIER_DICTIONARY[cat].forEach(mod => {
-      const valA = parseInt(document.getElementById(`panelA_${mod.id}`).value, 10) || 0;
-      const valB = parseInt(document.getElementById(`panelB_${mod.id}`).value, 10) || 0;
+  Object.keys(activePool).forEach(cat => {
+    activePool[cat].forEach(mod => {
+      const valA = parseFloat(document.getElementById(`panelA_${mod.id}`).value) || 0;
+      const valB = parseFloat(document.getElementById(`panelB_${mod.id}`).value) || 0;
 
       if (valA !== 0 || valB !== 0) {
         scoreA += valA * mod.weight;
@@ -234,8 +282,8 @@ function displayAnalysis(sA, sB, metrics) {
   inner.innerHTML = `
     <div class="verdict-banner" style="border-left: 4px solid var(--gold);">
       <div>
-        <div class="verdict-label">Local Character Scan Evaluation Done</div>
-        <div class="verdict-desc">Item values calculated accurately using canvas pre-filtering.</div>
+        <div class="verdict-label">Dynamic Asset Evaluation Done [${currentContext.toUpperCase()}]</div>
+        <div class="verdict-desc">Item values calculated accurately using targeted contextual filters.</div>
       </div>
       <div class="verdict-diff">
         <div class="diff-pct ${pctClass}">${totalShift >= 0 ? '+' : ''}${totalShift.toFixed(1)}%</div>
