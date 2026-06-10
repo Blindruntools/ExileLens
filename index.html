@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Exile's Lens — High-Precision Local Scanner</title>
+  <title>Exile's Lens — Contextual Scanner</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,19 +18,28 @@
       <div class="header-text">
         <p class="header-eyebrow">Path of Exile 2</p>
         <h1>Exile's Lens</h1>
-        <p class="header-sub">High-Contrast Client-Side Processor</p>
+        <p class="header-sub">Dynamic Contextual Stat Parser</p>
       </div>
     </header>
 
-    <!-- BUILD METRIC PROFILES -->
-    <section class="section build-section">
-      <label class="section-label" for="buildInput">
-        <span class="label-icon">📜</span> Active Build Archetype
-      </label>
-      <input type="text" id="buildInput" placeholder="e.g., Lightning Monk, Spirit Druid, Evasion Huntress..." spellcheck="false" />
+    <!-- CONTEXT CONTROL AND BUILD METRICS -->
+    <section class="control-cluster">
+      <div class="control-box">
+        <label class="section-label">⚔️ Item Type Context</label>
+        <div class="type-selector-group">
+          <button type="button" class="type-tab active" data-type="weapons">Weapons</button>
+          <button type="button" class="type-tab" data-type="armor">Armor</button>
+          <button type="button" class="type-tab" data-type="jewelry">Jewelry</button>
+        </div>
+      </div>
+      
+      <div class="control-box">
+        <label class="section-label" for="buildInput">📜 Active Build Archetype</label>
+        <input type="text" id="buildInput" placeholder="e.g., Lightning Monk, Spirit Druid..." spellcheck="false" />
+      </div>
     </section>
 
-    <!-- MATRIX MOD GRID -->
+    <!-- DATA ARRAYS GRID -->
     <section class="items-grid">
 
       <!-- CURRENT GEAR -->
@@ -38,7 +47,7 @@
         <div class="panel-header">
           <div class="panel-text-block">
             <div class="panel-title">Current Item</div>
-            <div class="panel-sub">Equipped Item Modifiers</div>
+            <div class="panel-sub">Equipped Modifiers</div>
           </div>
           <div class="panel-actions">
             <button type="button" class="action-btn scan-trigger-btn" data-target="itemA-file">📸 SCAN IMAGE</button>
@@ -55,12 +64,12 @@
         <div class="vs-line"></div>
       </div>
 
-      <!-- MARKET ITEM -->
+      <!-- TRADING TARGET -->
       <div class="item-panel" id="panelB">
         <div class="panel-header">
           <div class="panel-text-block">
             <div class="panel-title">Market Target</div>
-            <div class="panel-sub">Target Item Modifiers</div>
+            <div class="panel-sub">Target Modifiers</div>
           </div>
           <div class="panel-actions">
             <button type="button" class="action-btn scan-trigger-btn" data-target="itemB-file">📸 SCAN IMAGE</button>
@@ -82,7 +91,6 @@
     </section>
   </div>
 
-  <!-- Include Tesseract CDN for local execution -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="app.js"></script>
 </body>
