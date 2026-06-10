@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Exile's Lens — PoE2 Item Vision Oracle</title>
+  <title>Exile's Lens — High-Precision Local Scanner</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,11 +18,11 @@
       <div class="header-text">
         <p class="header-eyebrow">Path of Exile 2</p>
         <h1>Exile's Lens</h1>
-        <p class="header-sub">Multimodal AI Stat Comparator</p>
+        <p class="header-sub">High-Contrast Client-Side Processor</p>
       </div>
     </header>
 
-    <!-- BUILD CONFIGURATION -->
+    <!-- BUILD METRIC PROFILES -->
     <section class="section build-section">
       <label class="section-label" for="buildInput">
         <span class="label-icon">📜</span> Active Build Archetype
@@ -30,18 +30,18 @@
       <input type="text" id="buildInput" placeholder="e.g., Lightning Monk, Spirit Druid, Evasion Huntress..." spellcheck="false" />
     </section>
 
-    <!-- TWIN PANEL ATTRIBUTE MATRIX -->
+    <!-- MATRIX MOD GRID -->
     <section class="items-grid">
-      
-      <!-- EQUIPPED GEAR PANEL -->
+
+      <!-- CURRENT GEAR -->
       <div class="item-panel" id="panelA">
         <div class="panel-header">
           <div class="panel-text-block">
-            <div class="panel-title">Current Gear</div>
+            <div class="panel-title">Current Item</div>
             <div class="panel-sub">Equipped Item Modifiers</div>
           </div>
           <div class="panel-actions">
-            <button type="button" class="action-btn scan-trigger-btn" data-target="itemA-file">🔮 AI SCAN</button>
+            <button type="button" class="action-btn scan-trigger-btn" data-target="itemA-file">📸 SCAN IMAGE</button>
             <input type="file" id="itemA-file" class="item-image-input" accept="image/*" style="display: none;" />
             <button type="button" class="action-btn clear-btn" id="clearA">RESET</button>
           </div>
@@ -55,15 +55,15 @@
         <div class="vs-line"></div>
       </div>
 
-      <!-- TARGET ITEM MARKET PANEL -->
+      <!-- MARKET ITEM -->
       <div class="item-panel" id="panelB">
         <div class="panel-header">
           <div class="panel-text-block">
             <div class="panel-title">Market Target</div>
-            <div class="panel-sub">Trade Site Modifiers</div>
+            <div class="panel-sub">Target Item Modifiers</div>
           </div>
           <div class="panel-actions">
-            <button type="button" class="action-btn scan-trigger-btn" data-target="itemB-file">🔮 AI SCAN</button>
+            <button type="button" class="action-btn scan-trigger-btn" data-target="itemB-file">📸 SCAN IMAGE</button>
             <input type="file" id="itemB-file" class="item-image-input" accept="image/*" style="display: none;" />
             <button type="button" class="action-btn clear-btn" id="clearB">RESET</button>
           </div>
@@ -74,15 +74,16 @@
     </section>
 
     <div class="compare-row">
-      <button class="compare-btn" id="compareBtn">◆ Weigh Affix Differentials ◆</button>
+      <button class="compare-btn" id="compareBtn">◆ Weigh Affix Weight ◆</button>
     </div>
 
-    <!-- CALCULATION DISPLAY -->
     <section class="results-section" id="resultsSection">
       <div class="results-inner" id="resultsInner"></div>
     </section>
   </div>
 
+  <!-- Include Tesseract CDN for local execution -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
