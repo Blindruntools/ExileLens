@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght=0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -42,8 +42,7 @@
         <input 
           type="text" 
           id="buildInput" 
-          placeholder="e.g., I do cold damage, lightning monk, crit spell casting, tanky slam druid..." 
-          style="width: 100%; background: var(--bg-field); border: 1px solid var(--gold-dim); border-radius: var(--radius); color: var(--text); font-family: var(--font-body); font-size: 18px; padding: 12px 16px; outline: none;"
+          placeholder="e.g., Lightning monk, cold crit cast, tanky slam druid..." 
           spellcheck="false"
         />
         <div class="build-tags" id="buildTags"></div>
@@ -58,22 +57,22 @@
         <div class="panel-header">
           <div class="panel-text-block">
             <div class="panel-title">Current Item</div>
-            <div class="panel-sub">What you're wearing now</div>
+            <div class="panel-sub">Equipped Gear Modifiers</div>
           </div>
           
           <div class="panel-actions">
             <button type="button" class="action-btn scan-trigger-btn" data-target="itemA-file">📸 SCAN IMAGE</button>
-            <input type="file" id="itemA-file" class="item-image-input" data-textarea="itemA" accept="image/*" capture="environment" style="display: none;" />
-            <button type="button" class="action-btn clear-btn" id="clearA">CLEAR</button>
+            <input type="file" id="itemA-file" class="item-image-input" accept="image/*" capture="environment" style="display: none;" />
+            <button type="button" class="action-btn clear-btn" id="clearA">RESET</button>
           </div>
 
           <div class="item-socket" aria-hidden="true">
             <div class="socket-gem"></div>
           </div>
         </div>
-        <textarea id="itemA" class="item-textarea" placeholder="+80% Increased Physical Damage&#10;+50 to Maximum Mana" spellcheck="false"></textarea>
-        <div class="stat-preview" id="previewA">
-          <span class="preview-hint">Paste item stats or tap Scan Image ↑</span>
+
+        <div class="attribute-menu-container" id="menuA">
+          <!-- Populated Dynamically by JS -->
         </div>
       </div>
 
@@ -88,22 +87,22 @@
         <div class="panel-header">
           <div class="panel-text-block">
             <div class="panel-title">Market Item</div>
-            <div class="panel-sub">The one you're considering</div>
+            <div class="panel-sub">Potential Upgrade Modifiers</div>
           </div>
 
           <div class="panel-actions">
             <button type="button" class="action-btn scan-trigger-btn" data-target="itemB-file">📸 SCAN IMAGE</button>
-            <input type="file" id="itemB-file" class="item-image-input" data-textarea="itemB" accept="image/*" capture="environment" style="display: none;" />
-            <button type="button" class="action-btn clear-btn" id="clearB">CLEAR</button>
+            <input type="file" id="itemB-file" class="item-image-input" accept="image/*" capture="environment" style="display: none;" />
+            <button type="button" class="action-btn clear-btn" id="clearB">RESET</button>
           </div>
 
           <div class="item-socket" aria-hidden="true">
             <div class="socket-gem gem-blue"></div>
           </div>
         </div>
-        <textarea id="itemB" class="item-textarea" placeholder="+120% Increased Physical Damage&#10;+70 to Maximum Mana" spellcheck="false"></textarea>
-        <div class="stat-preview" id="previewB">
-          <span class="preview-hint">Paste item stats or tap Scan Image ↑</span>
+
+        <div class="attribute-menu-container" id="menuB">
+          <!-- Populated Dynamically by JS -->
         </div>
       </div>
 
@@ -113,7 +112,7 @@
     <div class="compare-row">
       <button class="compare-btn" id="compareBtn">
         <span class="btn-glyph" aria-hidden="true">◆</span>
-        Compare Items
+        Analyze & Compare
         <span class="btn-glyph" aria-hidden="true">◆</span>
       </button>
     </div>
@@ -127,7 +126,7 @@
     <footer class="site-footer">
       <div class="footer-sep" aria-hidden="true"></div>
       <div style="margin-bottom: 24px;">
-        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=lee.finelines@gmail.com&item_name=Exile's+Lens+Development&currency_code=USD" target="_blank" style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--font-display); font-size: 12px; color: var(--gold); border: 1px solid var(--gold-dim); padding: 8px 18px; background: rgba(20, 16, 9, 0.6); border-radius: var(--radius); letter-spacing: 0.15em;">
+        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=lee.finelines@gmail.com&item_name=Exile's+Lens+Development&currency_code=USD" target="_blank" class="support-link">
           <span>🪙</span> SUPPORT THE ORACLE
         </a>
       </div>
