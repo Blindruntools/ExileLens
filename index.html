@@ -3,77 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Exile's Lens — PoE2 Item Comparator</title>
+  <title>Exile's Lens — PoE2 Item Vision Oracle</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght=0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght=0,400;0,600;1,400&display=swap" rel="stylesheet">
 </head>
 <body>
-
-  <div class="bg-runes" aria-hidden="true">
-    <div class="rune r1">ᚦ</div>
-    <div class="rune r2">ᚨ</div>
-    <div class="rune r3">ᚱ</div>
-    <div class="rune r4">ᛏ</div>
-    <div class="rune r5">ᛗ</div>
-    <div class="rune r6">ᚢ</div>
-  </div>
 
   <div class="vignette" aria-hidden="true"></div>
 
   <div class="container">
-
-    <!-- HEADER -->
     <header class="site-header">
       <div class="header-text">
         <p class="header-eyebrow">Path of Exile 2</p>
         <h1>Exile's Lens</h1>
-        <p class="header-sub">Item Comparison Oracle</p>
+        <p class="header-sub">Multimodal AI Stat Comparator</p>
       </div>
     </header>
 
-    <!-- CUSTOM BUILD PROFILE INPUT -->
+    <!-- BUILD CONFIGURATION -->
     <section class="section build-section">
       <label class="section-label" for="buildInput">
-        <span class="label-icon">📜</span> Build Profile / Mechanics Focus
+        <span class="label-icon">📜</span> Active Build Archetype
       </label>
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        <input 
-          type="text" 
-          id="buildInput" 
-          placeholder="e.g., Lightning monk, cold crit cast, tanky slam druid..." 
-          spellcheck="false"
-        />
-        <div class="build-tags" id="buildTags"></div>
-      </div>
+      <input type="text" id="buildInput" placeholder="e.g., Lightning Monk, Spirit Druid, Evasion Huntress..." spellcheck="false" />
     </section>
 
-    <!-- ITEM INPUTS -->
+    <!-- TWIN PANEL ATTRIBUTE MATRIX -->
     <section class="items-grid">
-
-      <!-- CURRENT ITEM CONTAINER -->
+      
+      <!-- EQUIPPED GEAR PANEL -->
       <div class="item-panel" id="panelA">
         <div class="panel-header">
           <div class="panel-text-block">
-            <div class="panel-title">Current Item</div>
-            <div class="panel-sub">Equipped Gear Modifiers</div>
+            <div class="panel-title">Current Gear</div>
+            <div class="panel-sub">Equipped Item Modifiers</div>
           </div>
-          
           <div class="panel-actions">
-            <button type="button" class="action-btn scan-trigger-btn" data-target="itemA-file">📸 SCAN IMAGE</button>
-            <input type="file" id="itemA-file" class="item-image-input" accept="image/*" capture="environment" style="display: none;" />
+            <button type="button" class="action-btn scan-trigger-btn" data-target="itemA-file">🔮 AI SCAN</button>
+            <input type="file" id="itemA-file" class="item-image-input" accept="image/*" style="display: none;" />
             <button type="button" class="action-btn clear-btn" id="clearA">RESET</button>
           </div>
-
-          <div class="item-socket" aria-hidden="true">
-            <div class="socket-gem"></div>
-          </div>
         </div>
-
-        <div class="attribute-menu-container" id="menuA">
-          <!-- Populated Dynamically by JS -->
-        </div>
+        <div class="attribute-menu-container" id="menuA"></div>
       </div>
 
       <div class="vs-divider" aria-hidden="true">
@@ -82,60 +55,34 @@
         <div class="vs-line"></div>
       </div>
 
-      <!-- MARKET ITEM CONTAINER -->
+      <!-- TARGET ITEM MARKET PANEL -->
       <div class="item-panel" id="panelB">
         <div class="panel-header">
           <div class="panel-text-block">
-            <div class="panel-title">Market Item</div>
-            <div class="panel-sub">Potential Upgrade Modifiers</div>
+            <div class="panel-title">Market Target</div>
+            <div class="panel-sub">Trade Site Modifiers</div>
           </div>
-
           <div class="panel-actions">
-            <button type="button" class="action-btn scan-trigger-btn" data-target="itemB-file">📸 SCAN IMAGE</button>
-            <input type="file" id="itemB-file" class="item-image-input" accept="image/*" capture="environment" style="display: none;" />
+            <button type="button" class="action-btn scan-trigger-btn" data-target="itemB-file">🔮 AI SCAN</button>
+            <input type="file" id="itemB-file" class="item-image-input" accept="image/*" style="display: none;" />
             <button type="button" class="action-btn clear-btn" id="clearB">RESET</button>
           </div>
-
-          <div class="item-socket" aria-hidden="true">
-            <div class="socket-gem gem-blue"></div>
-          </div>
         </div>
-
-        <div class="attribute-menu-container" id="menuB">
-          <!-- Populated Dynamically by JS -->
-        </div>
+        <div class="attribute-menu-container" id="menuB"></div>
       </div>
 
     </section>
 
-    <!-- COMPARE BUTTON -->
     <div class="compare-row">
-      <button class="compare-btn" id="compareBtn">
-        <span class="btn-glyph" aria-hidden="true">◆</span>
-        Analyze & Compare
-        <span class="btn-glyph" aria-hidden="true">◆</span>
-      </button>
+      <button class="compare-btn" id="compareBtn">◆ Weigh Affix Differentials ◆</button>
     </div>
 
-    <!-- RESULTS -->
+    <!-- CALCULATION DISPLAY -->
     <section class="results-section" id="resultsSection">
       <div class="results-inner" id="resultsInner"></div>
     </section>
-
-    <!-- FOOTER -->
-    <footer class="site-footer">
-      <div class="footer-sep" aria-hidden="true"></div>
-      <div style="margin-bottom: 24px;">
-        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=lee.finelines@gmail.com&item_name=Exile's+Lens+Development&currency_code=USD" target="_blank" class="support-link">
-          <span>🪙</span> SUPPORT THE ORACLE
-        </a>
-      </div>
-      <p>Exile's Lens • Unofficial Fan Tool • Not affiliated with Grinding Gear Games</p>
-    </footer>
-
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
