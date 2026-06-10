@@ -1,153 +1,154 @@
 /**
- * EXILE'S LENS — Exact Item Contextual Scanning Matrix
+ * EXILE'S LENS — Complete Comprehensive PoE2 Stat Scanner Matrix
  */
 
 const POE2_CONTEXTUAL_DATABASE = {
-  // --- WEAPONS CATEGORY BREAKDOWNS ---
-  "one-handed-swords": {
-    implicits: [
-      { id: 'crit_chance', label: 'Base Critical Hit Chance %', keywords: ['critical', 'chance'], weight: 1.5 },
-      { id: 'attack_speed', label: 'Attacks Per Second', keywords: ['attacks', 'second'], weight: 3.0 }
+  weapons: {
+    base_damage: [
+      { id: 'added_phys', label: 'Added Physical Damage', keywords: ['added', 'physical', 'damage'], weight: 2.5 },
+      { id: 'inc_phys_pct', label: '% Increased Physical Damage', keywords: ['increased', 'physical', 'damage'], weight: 3.0 },
+      { id: 'added_fire', label: 'Added Fire Damage', keywords: ['added', 'fire', 'damage'], weight: 2.0 },
+      { id: 'added_cold', label: 'Added Cold Damage', keywords: ['added', 'cold', 'damage'], weight: 2.0 },
+      { id: 'added_lightning', label: 'Added Lightning Damage', keywords: ['added', 'lightning', 'damage'], weight: 2.0 },
+      { id: 'added_chaos', label: 'Added Chaos Damage', keywords: ['added', 'chaos', 'damage'], weight: 2.5 }
     ],
-    damage_metrics: [
-      { id: 'phys_dmg_min', label: 'Min Physical Damage', keywords: ['physical', 'damage'], weight: 2.0 },
-      { id: 'phys_dmg_max', label: 'Max Physical Damage', keywords: ['physical', 'damage'], weight: 2.0 },
-      { id: 'lightning_dmg', label: 'Adds to Lightning Damage', keywords: ['added', 'lightning', 'damage'], weight: 2.5 },
-      { id: 'fire_dmg', label: 'Adds to Fire Damage', keywords: ['added', 'fire', 'damage'], weight: 2.5 },
-      { id: 'cold_dmg', label: 'Adds to Cold Damage', keywords: ['added', 'cold', 'damage'], weight: 2.5 }
+    damage_scaling: [
+      { id: 'inc_dmg_pct', label: '% Increased Damage', keywords: ['increased', 'damage'], weight: 2.0 },
+      { id: 'inc_ele_dmg', label: '% Increased Elemental Damage', keywords: ['increased', 'elemental', 'damage'], weight: 2.0 },
+      { id: 'inc_chaos_dmg', label: '% Increased Chaos Damage', keywords: ['increased', 'chaos', 'damage'], weight: 2.5 },
+      { id: 'inc_spell_dmg', label: '% Increased Spell Damage', keywords: ['increased', 'spell', 'damage'], weight: 2.5 },
+      { id: 'inc_attack_dmg', label: '% Increased Attack Damage', keywords: ['increased', 'attack', 'damage'], weight: 2.0 }
     ],
-    utility: [
-      { id: 'accuracy_rating', label: '+ to Accuracy Rating', keywords: ['accuracy', 'rating'], weight: 1.0 },
-      { id: 'phys_dmg_pct', label: '% Increased Physical Damage', keywords: ['increased', 'physical', 'damage'], weight: 2.5 }
+    speed_and_crit: [
+      { id: 'attack_speed', label: 'Attack Speed', keywords: ['attack', 'speed'], weight: 3.5 },
+      { id: 'cast_speed', label: 'Cast Speed', keywords: ['cast', 'speed'], weight: 3.0 },
+      { id: 'projectile_speed', label: 'Projectile Speed', keywords: ['projectile', 'speed'], weight: 1.5 },
+      { id: 'reload_speed', label: 'Reload Speed (Crossbows)', keywords: ['reload', 'speed'], weight: 2.0 },
+      { id: 'crit_chance', label: 'Critical Strike Chance', keywords: ['critical', 'strike', 'chance'], weight: 2.5 },
+      { id: 'crit_mult', label: 'Critical Strike Multiplier', keywords: ['critical', 'strike', 'multiplier'], weight: 3.0 },
+      { id: 'glob_crit_chance', label: 'Global Critical Strike Chance', keywords: ['global', 'critical', 'chance'], weight: 2.5 },
+      { id: 'glob_crit_mult', label: 'Global Critical Strike Multiplier', keywords: ['global', 'critical', 'multiplier'], weight: 3.0 }
+    ],
+    accuracy_and_sustain: [
+      { id: 'accuracy_rating', label: 'Accuracy Rating', keywords: ['accuracy', 'rating'], weight: 1.5 },
+      { id: 'inc_accuracy_pct', label: '% Increased Accuracy Rating', keywords: ['increased', 'accuracy'], weight: 1.5 },
+      { id: 'phys_leech_life', label: 'Physical Damage Leeched as Life', keywords: ['physical', 'leeched', 'life'], weight: 1.5 },
+      { id: 'phys_leech_mana', label: 'Physical Damage Leeched as Mana', keywords: ['physical', 'leeched', 'mana'], weight: 1.5 },
+      { id: 'life_leech', label: 'Life Leech', keywords: ['life', 'leech'], weight: 1.5 },
+      { id: 'mana_leech', label: 'Mana Leech', keywords: ['mana', 'leech'], weight: 1.5 }
+    ],
+    skill_levels: [
+      { id: 'skills_all', label: 'Levels to All Skills', keywords: ['levels', 'all', 'skills'], weight: 6.0 },
+      { id: 'skills_spell', label: 'Levels to Spell Skills', keywords: ['levels', 'spell', 'skills'], weight: 5.0 },
+      { id: 'skills_melee', label: 'Levels to Melee Skills', keywords: ['levels', 'melee', 'skills'], weight: 5.0 },
+      { id: 'skills_proj', label: 'Levels to Projectile Skills', keywords: ['levels', 'projectile', 'skills'], weight: 5.0 }
     ]
   },
-  "quarterstaffs": {
-    implicits: [
-      { id: 'block_chance', label: '% Chance to Block Attacks', keywords: ['chance', 'block'], weight: 2.0 },
-      { id: 'attack_speed', label: 'Attacks Per Second', keywords: ['attacks', 'second'], weight: 3.0 }
-    ],
-    damage_metrics: [
-      { id: 'phys_dmg_min', label: 'Min Physical Damage', keywords: ['physical', 'damage'], weight: 2.0 },
-      { id: 'phys_dmg_max', label: 'Max Physical Damage', keywords: ['physical', 'damage'], weight: 2.0 },
-      { id: 'fire_dmg', label: 'Adds to Fire Damage', keywords: ['added', 'fire', 'damage'], weight: 2.5 }
-    ],
-    utility: [
-      { id: 'crit_chance_pct', label: '% Increased Critical Strike Chance', keywords: ['increased', 'critical', 'strike', 'chance'], weight: 2.0 },
-      { id: 'cast_speed', label: '% Increased Cast Speed', keywords: ['cast', 'speed', 'increased'], weight: 2.5 }
-    ]
-  },
-  "bows": {
-    implicits: [
-      { id: 'attack_speed', label: 'Attacks Per Second', keywords: ['attacks', 'second'], weight: 3.0 }
-    ],
-    damage_metrics: [
-      { id: 'phys_dmg_min', label: 'Min Physical Damage', keywords: ['physical', 'damage'], weight: 2.0 },
-      { id: 'phys_dmg_max', label: 'Max Physical Damage', keywords: ['physical', 'damage'], weight: 2.0 },
-      { id: 'lightning_dmg', label: 'Adds to Lightning Damage', keywords: ['added', 'lightning', 'damage'], weight: 2.5 },
-      { id: 'cold_dmg', label: 'Adds to Cold Damage', keywords: ['added', 'cold', 'damage'], weight: 2.5 }
-    ],
-    utility: [
-      { id: 'proj_speed', label: '% Increased Projectile Speed', keywords: ['projectile', 'speed'], weight: 1.5 },
-      { id: 'phys_dmg_pct', label: '% Increased Physical Damage', keywords: ['increased', 'physical', 'damage'], weight: 2.5 }
-    ]
-  },
-
-  // --- ARMOR CATEGORY BREAKDOWNS ---
-  "body-armour": {
-    implicits: [
-      { id: 'inc_attr_req', label: '% Increased Attribute Requirements', keywords: ['attribute', 'requirement', 'increased'], weight: -1.0 },
-      { id: 'base_armour', label: 'Base Armour Value', keywords: ['armour'], weight: 1.0 },
-      { id: 'base_evasion', label: 'Base Evasion Value', keywords: ['evasion'], weight: 1.0 }
-    ],
+  armor: {
     defences: [
-      { id: 'armour_pct', label: '% Increased Armour', keywords: ['increased', 'armour'], weight: 2.0 },
-      { id: 'evasion_pct', label: '% Increased Evasion', keywords: ['increased', 'evasion'], weight: 2.0 },
-      { id: 'energy_shield', label: '+ to Energy Shield', keywords: ['energy', 'shield'], weight: 1.5 }
+      { id: 'armour_val', label: 'Armour Value', keywords: ['armour'], weight: 1.5 },
+      { id: 'inc_armour_pct', label: '% Increased Armour', keywords: ['increased', 'armour'], weight: 2.0 },
+      { id: 'evasion_val', label: 'Evasion Rating', keywords: ['evasion', 'rating'], weight: 1.5 },
+      { id: 'inc_evasion_pct', label: '% Increased Evasion', keywords: ['increased', 'evasion'], weight: 2.0 },
+      { id: 'es_val', label: 'Energy Shield', keywords: ['energy', 'shield'], weight: 1.5 },
+      { id: 'inc_es_pct', label: '% Increased Energy Shield', keywords: ['increased', 'energy', 'shield'], weight: 2.0 }
     ],
-    resources: [
-      { id: 'max_life', label: '+ to Maximum Life', keywords: ['maximum', 'life'], weight: 2.5 },
-      { id: 'spirit', label: '+ to Spirit', keywords: ['spirit'], weight: 4.0 }
-    ]
-  },
-  "boots": {
-    implicits: [
-      { id: 'base_armour', label: 'Base Armour Value', keywords: ['armour'], weight: 1.0 },
-      { id: 'base_evasion', label: 'Base Evasion Value', keywords: ['evasion'], weight: 1.0 }
+    hybrid_defences: [
+      { id: 'armour_evasion', label: 'Armour + Evasion', keywords: ['armour', 'evasion'], weight: 2.0 },
+      { id: 'armour_es', label: 'Armour + Energy Shield', keywords: ['armour', 'energy', 'shield'], weight: 2.0 },
+      { id: 'evasion_es', label: 'Evasion + Energy Shield', keywords: ['evasion', 'energy', 'shield'], weight: 2.0 },
+      { id: 'armour_evasion_es', label: 'Armour + Evasion + Energy Shield', keywords: ['armour', 'evasion', 'energy', 'shield'], weight: 2.5 }
     ],
-    defences: [
-      { id: 'armour_pct', label: '% Increased Armour', keywords: ['increased', 'armour'], weight: 2.0 },
-      { id: 'evasion_pct', label: '% Increased Evasion', keywords: ['increased', 'evasion'], weight: 2.0 }
+    core_attributes: [
+      { id: 'strength', label: 'Strength', keywords: ['strength'], weight: 1.5 },
+      { id: 'dexterity', label: 'Dexterity', keywords: ['dexterity'], weight: 1.5 },
+      { id: 'intelligence', label: 'Intelligence', keywords: ['intelligence'], weight: 1.5 },
+      { id: 'all_stats', label: 'All Attributes', keywords: ['all', 'attributes'], weight: 4.5 },
+      { id: 'str_dex', label: 'Strength + Dexterity', keywords: ['strength', 'dexterity'], weight: 3.0 },
+      { id: 'str_int', label: 'Strength + Intelligence', keywords: ['strength', 'intelligence'], weight: 3.0 },
+      { id: 'dex_int', label: 'Dexterity + Intelligence', keywords: ['dexterity', 'intelligence'], weight: 3.0 }
     ],
-    utility: [
-      { id: 'move_speed', label: '% Increased Movement Speed', keywords: ['movement', 'speed'], weight: 5.5 },
-      { id: 'max_life', label: '+ to Maximum Life', keywords: ['maximum', 'life'], weight: 2.0 },
-      { id: 'fire_res', label: '% Fire Resistance', keywords: ['fire', 'resistance'], weight: 1.2 }
-    ]
-  },
-  "shields": {
-    implicits: [
-      { id: 'block_chance', label: '% Chance to Block Attacks', keywords: ['chance', 'block'], weight: 3.5 },
-      { id: 'base_armour', label: 'Base Armour Value', keywords: ['armour'], weight: 1.0 }
+    life_mana_spirit: [
+      { id: 'max_life', label: 'Maximum Life', keywords: ['maximum', 'life'], weight: 2.5 },
+      { id: 'life_regen', label: 'Life Regeneration', keywords: ['life', 'regeneration'], weight: 1.2 },
+      { id: 'max_mana', label: 'Maximum Mana', keywords: ['maximum', 'mana'], weight: 1.5 },
+      { id: 'mana_regen', label: 'Mana Regeneration', keywords: ['mana', 'regeneration'], weight: 1.2 },
+      { id: 'spirit', label: 'Spirit', keywords: ['spirit'], weight: 4.5 }
     ],
-    defences: [
-      { id: 'armour_pct', label: '% Increased Armour', keywords: ['increased', 'armour'], weight: 2.0 },
-      { id: 'all_res', label: '+% to all Elemental Resistances', keywords: ['all', 'elemental', 'resistances'], weight: 3.0 }
-    ],
-    utility: [
-      { id: 'block_recovery', label: '% Increased Block Recovery', keywords: ['block', 'recovery'], weight: 1.0 },
-      { id: 'max_life', label: '+ to Maximum Life', keywords: ['maximum', 'life'], weight: 2.0 }
-    ]
-  },
-
-  // --- JEWELRY CATEGORY BREAKDOWNS ---
-  "amulets": {
-    implicits: [
-      { id: 'base_all_res', label: '+% to all Elemental Resistances', keywords: ['all', 'elemental', 'resistances'], weight: 3.0 }
-    ],
-    attributes: [
-      { id: 'all_stats', label: '+ to All Attributes', keywords: ['all', 'attributes'], weight: 4.5 },
-      { id: 'strength', label: '+ to Strength', keywords: ['strength'], weight: 1.5 },
-      { id: 'dexterity', label: '+ to Dexterity', keywords: ['dexterity'], weight: 1.5 },
-      { id: 'intelligence', label: '+ to Intelligence', keywords: ['intelligence'], weight: 1.5 }
-    ],
-    utility: [
-      { id: 'crit_multiplier', label: '+% to Global Critical Strike Multiplier', keywords: ['critical', 'strike', 'multiplier'], weight: 2.5 },
-      { id: 'max_life', label: '+ to Maximum Life', keywords: ['maximum', 'life'], weight: 2.0 }
-    ]
-  },
-  "rings": {
-    implicits: [
-      { id: 'base_mana', label: '+ to Maximum Mana', keywords: ['maximum', 'mana'], weight: 1.0 },
-      { id: 'fire_res_implicit', label: '% Fire Resistance Implicit', keywords: ['fire', 'resistance'], weight: 1.2 }
-    ],
-    utility: [
-      { id: 'max_life', label: '+ to Maximum Life', keywords: ['maximum', 'life'], weight: 2.0 },
-      { id: 'mana_regen', label: '% Increased Mana Regeneration Rate', keywords: ['mana', 'regeneration'], weight: 1.5 }
-    ],
-    resists: [
-      { id: 'lightning_res', label: '% Lightning Resistance', keywords: ['lightning', 'resistance'], weight: 1.2 },
-      { id: 'cold_res', label: '% Cold Resistance', keywords: ['cold', 'resistance'], weight: 1.2 },
-      { id: 'chaos_res', label: '% Chaos Resistance', keywords: ['chaos', 'resistance'], weight: 2.5 }
-    ]
-  },
-  "belts": {
-    implicits: [
-      { id: 'base_life', label: '+ to Maximum Life Implicit', keywords: ['maximum', 'life'], weight: 2.0 }
-    ],
-    utility: [
-      { id: 'max_life', label: '+ to Maximum Life Explicit', keywords: ['maximum', 'life'], weight: 2.0 },
-      { id: 'flask_charges', label: '% Increased Flask Charges Gained', keywords: ['flask', 'charges', 'gained'], weight: 1.0 }
-    ],
-    resists: [
+    resists_and_utility: [
       { id: 'fire_res', label: '% Fire Resistance', keywords: ['fire', 'resistance'], weight: 1.2 },
-      { id: 'cold_res', label: '% Cold Resistance', keywords: ['cold', 'resistance'], weight: 1.2 }
+      { id: 'cold_res', label: '% Cold Resistance', keywords: ['cold', 'resistance'], weight: 1.2 },
+      { id: 'lightning_res', label: '% Lightning Resistance', keywords: ['lightning', 'resistance'], weight: 1.2 },
+      { id: 'chaos_res', label: '% Chaos Resistance', keywords: ['chaos', 'resistance'], weight: 2.5 },
+      { id: 'all_ele_res', label: '% All Elemental Resistances', keywords: ['all', 'elemental', 'resistances'], weight: 3.0 },
+      { id: 'move_speed', label: '% Increased Movement Speed (Boots)', keywords: ['movement', 'speed'], weight: 6.0 },
+      { id: 'block_chance', label: 'Block Chance', keywords: ['block', 'chance'], weight: 2.0 },
+      { id: 'stun_threshold', label: 'Stun Threshold', keywords: ['stun', 'threshold'], weight: 1.0 },
+      { id: 'rarity_found', label: '% Increased Rarity of Items Found', keywords: ['rarity', 'found'], weight: 1.5 }
+    ]
+  },
+  rings: {
+    implicits: [
+      { id: 'ruby_fire', label: 'Ruby Ring Base (Fire Res)', keywords: ['fire', 'resistance'], weight: 1.2 },
+      { id: 'sapphire_cold', label: 'Sapphire Ring Base (Cold Res)', keywords: ['cold', 'resistance'], weight: 1.2 },
+      { id: 'topaz_lightning', label: 'Topaz Ring Base (Lightning Res)', keywords: ['lightning', 'resistance'], weight: 1.2 },
+      { id: 'amethyst_chaos', label: 'Amethyst Ring Base (Chaos Res)', keywords: ['chaos', 'resistance'], weight: 2.5 },
+      { id: 'prismatic_all', label: 'Prismatic Ring Base (All Res)', keywords: ['all', 'resistances'], weight: 3.0 },
+      { id: 'emerald_acc', label: 'Emerald Ring Base (Accuracy)', keywords: ['accuracy'], weight: 1.5 },
+      { id: 'pearl_cast', label: 'Pearl Ring Base (Cast Speed)', keywords: ['cast', 'speed'], weight: 2.5 },
+      { id: 'iron_phys', label: 'Iron Ring Base (Physical Damage)', keywords: ['physical', 'damage'], weight: 2.0 },
+      { id: 'lazuli_mana', label: 'Lazuli Ring Base (Mana)', keywords: ['mana'], weight: 1.5 },
+      { id: 'hoop_all', label: 'Golden Hoop Base (All Attributes)', keywords: ['all', 'attributes'], weight: 4.5 },
+      { id: 'gold_rarity', label: 'Gold Ring Base (Item Rarity)', keywords: ['rarity', 'found'], weight: 2.0 },
+      { id: 'unset_slot', label: 'Unset Ring Base (Extra Skill Slot)', keywords: ['unset', 'skill', 'slot'], weight: 5.0 }
+    ],
+    explicits: [
+      { id: 'max_life', label: 'Maximum Life', keywords: ['maximum', 'life'], weight: 2.5 },
+      { id: 'max_mana', label: 'Maximum Mana', keywords: ['maximum', 'mana'], weight: 1.5 },
+      { id: 'mana_regen', label: 'Mana Regeneration', keywords: ['mana', 'regeneration'], weight: 1.5 },
+      { id: 'fire_res', label: '% Fire Resistance', keywords: ['fire', 'resistance'], weight: 1.2 },
+      { id: 'cold_res', label: '% Cold Resistance', keywords: ['cold', 'resistance'], weight: 1.2 },
+      { id: 'lightning_res', label: '% Lightning Resistance', keywords: ['lightning', 'resistance'], weight: 1.2 },
+      { id: 'chaos_res', label: '% Chaos Resistance', keywords: ['chaos', 'resistance'], weight: 2.5 },
+      { id: 'glob_crit_chance', label: 'Global Critical Strike Chance', keywords: ['global', 'critical', 'chance'], weight: 2.5 },
+      { id: 'glob_crit_mult', label: 'Global Critical Strike Multiplier', keywords: ['global', 'critical', 'multiplier'], weight: 3.0 },
+      { id: 'rarity_found', label: '% Increased Rarity of Items Found', keywords: ['rarity', 'found'], weight: 1.5 }
+    ],
+    core_attributes: [
+      { id: 'strength', label: 'Strength', keywords: ['strength'], weight: 1.5 },
+      { id: 'dexterity', label: 'Dexterity', keywords: ['dexterity'], weight: 1.5 },
+      { id: 'intelligence', label: 'Intelligence', keywords: ['intelligence'], weight: 1.5 },
+      { id: 'all_stats', label: 'All Attributes', keywords: ['all', 'attributes'], weight: 4.5 }
+    ]
+  },
+  amulet: {
+    implicits: [
+      { id: 'imp_strength', label: 'Amulet Base: Strength', keywords: ['strength'], weight: 1.5 },
+      { id: 'imp_dexterity', label: 'Amulet Base: Dexterity', keywords: ['dexterity'], weight: 1.5 },
+      { id: 'imp_intelligence', label: 'Amulet Base: Intelligence', keywords: ['intelligence'], weight: 1.5 },
+      { id: 'imp_all_stats', label: 'Amulet Base: All Attributes', keywords: ['all', 'attributes'], weight: 4.5 },
+      { id: 'imp_spirit', label: 'Amulet Base: Spirit', keywords: ['spirit'], weight: 4.5 },
+      { id: 'imp_mana_regen', label: 'Amulet Base: Mana Regeneration', keywords: ['mana', 'regeneration'], weight: 1.5 },
+      { id: 'imp_es_bonus', label: 'Amulet Base: Energy Shield', keywords: ['energy', 'shield'], weight: 1.5 }
+    ],
+    valuable_explicits: [
+      { id: 'skills_all', label: 'Levels to All Skills', keywords: ['levels', 'all', 'skills'], weight: 6.0 },
+      { id: 'skills_spell', label: 'Levels to Spell Skills', keywords: ['levels', 'spell', 'skills'], weight: 5.0 },
+      { id: 'max_life', label: 'Maximum Life', keywords: ['maximum', 'life'], weight: 2.5 },
+      { id: 'fire_res', label: '% Fire Resistance', keywords: ['fire', 'resistance'], weight: 1.2 },
+      { id: 'cold_res', label: '% Cold Resistance', keywords: ['cold', 'resistance'], weight: 1.2 },
+      { id: 'lightning_res', label: '% Lightning Resistance', keywords: ['lightning', 'resistance'], weight: 1.2 },
+      { id: 'chaos_res', label: '% Chaos Resistance', keywords: ['chaos', 'resistance'], weight: 2.5 },
+      { id: 'glob_crit_chance', label: 'Global Critical Strike Chance', keywords: ['global', 'critical', 'chance'], weight: 2.5 },
+      { id: 'glob_crit_mult', label: 'Global Critical Strike Multiplier', keywords: ['global', 'critical', 'multiplier'], weight: 3.0 },
+      { id: 'rarity_found', label: '% Increased Rarity of Items Found', keywords: ['rarity', 'found'], weight: 1.5 },
+      { id: 'spirit', label: 'Spirit', keywords: ['spirit'], weight: 4.5 }
     ]
   }
 };
 
-let currentContext = 'one-handed-swords'; // Precise tracking baseline default initialization state
+let currentContext = 'weapons';
 
-// INITIALIZATION PIPELINE
 document.addEventListener('DOMContentLoaded', () => {
   rebuildContextualPanels();
   initActionListeners();
@@ -163,7 +164,6 @@ function setupContextTabs() {
       currentContext = tab.getAttribute('data-type');
       rebuildContextualPanels();
       
-      // Clean display structures
       document.getElementById('resultsSection').classList.remove('visible');
     });
   });
@@ -183,7 +183,7 @@ function renderActiveMenu(containerId, prefix) {
   Object.keys(activePool).forEach(cat => {
     const section = document.createElement('div');
     section.className = 'attribute-category-group';
-    section.innerHTML = `<div class="category-group-title">${cat.toUpperCase().replace('_', ' ')}</div>`;
+    section.innerHTML = `<div class="category-group-title">${cat.toUpperCase().replace(/_/g, ' ')}</div>`;
 
     activePool[cat].forEach(mod => {
       const row = document.createElement('div');
@@ -234,7 +234,7 @@ function initActionListeners() {
             });
             processContextualTokens(res.data.text, targetPrefix);
           } catch (err) {
-            console.error("Local Capture Fault Exception Encountered: ", err);
+            console.error("OCR Failure Exception: ", err);
           } finally {
             indicator.innerText = '📸 SCAN IMAGE';
           }
@@ -296,13 +296,7 @@ function processContextualTokens(rawText, prefix) {
         if (keywordHits >= Math.ceil(mod.keywords.length * 0.7)) {
           const uiTargetNode = document.getElementById(`${prefix}_${mod.id}`);
           if (uiTargetNode) {
-            if (mod.id === 'phys_dmg_min' && numbersFound.length >= 2) {
-              uiTargetNode.value = parseInt(numbersFound[0], 10);
-              const maxNode = document.getElementById(`${prefix}_phys_dmg_max`);
-              if (maxNode) maxNode.value = parseInt(numbersFound[1], 10);
-            } else if (mod.id !== 'phys_dmg_max') {
-              uiTargetNode.value = parseInt(numbersFound[0], 10);
-            }
+            uiTargetNode.value = parseInt(numbersFound[0], 10);
           }
         }
       });
@@ -366,17 +360,22 @@ function displayAnalysis(sA, sB, metrics) {
   inner.innerHTML = `
     <div class="verdict-banner" style="border-left: 4px solid var(--gold);">
       <div>
-        <div class="verdict-label">Exact Base Evaluation Complete [${currentContext.toUpperCase()}]</div>
-        <div class="verdict-desc">Item metrics mapped accurately using class-specific layout constraints.</div>
+        <div class="verdict-label">Evaluation Complete [${currentContext.toUpperCase()}]</div>
+        <div class="verdict-desc">Computed matching weights using category targets.</div>
       </div>
       <div class="verdict-diff">
         <div class="diff-pct ${pctClass}">${totalShift >= 0 ? '+' : ''}${totalShift.toFixed(1)}%</div>
-        <div class="diff-label">Calculated Shift</div>
+        <div class="diff-label">Weight Differential</div>
       </div>
     </div>
     <div class="score-card">
       <div class="stat-breakdown">
-        ${metrics.map(m => `<div class="breakdown-row"><span class="breakdown-stat">${m.label}</span><span class="breakdown-val">${m.a} ➔ ${m.b}</span></div>`).join('')}
+        ${metrics.map(m => `
+          <div class="breakdown-row">
+            <span class="breakdown-stat">${m.label}</span>
+            <span class="breakdown-val">${m.a} ➔ ${m.b}</span>
+          </div>
+        `).join('')}
       </div>
     </div>
   `;
