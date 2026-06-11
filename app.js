@@ -1,5 +1,6 @@
 /**
- * EXILE'S LENS — Core Execution Logic with Upgrade Diagnostics
+ * EXILE'S LENS — Core Execution Logic
+ * Features: Otsu Adaptive Binarization & Layout-Aware Token Anchor Matching
  */
 
 const POE2_CONTEXTUAL_DATABASE = {
@@ -141,7 +142,8 @@ const POE2_CONTEXTUAL_DATABASE = {
       { id: 'imp_all_stats', label: 'Amulet Base: All Attributes', keywords: ['all', 'attributes'], weight: 4.5 },
       { id: 'imp_spirit', label: 'Amulet Base: Spirit', keywords: ['spirit'], weight: 4.5 },
       { id: 'imp_mana_regen', label: 'Amulet Base: Mana Regeneration', keywords: ['mana', 'regeneration'], weight: 1.5 },
-      { id: 'imp_es_bonus', label: 'Amulet Base: Energy Shield', keywords: ['energy', 'shield'], weight: 1.5 }
+      { id: 'imp_es_bonus', label: 'Amulet Base: Energy Shield', keywords: ['energy', 'shield'], weight: 1.5 },
+      { id: 'imp_runic_ward', label: '% Increased Maximum Runic Ward', keywords: ['increased', 'maximum', 'runic', 'ward'], weight: 2.0 }
     ],
     damage_modifiers: [
       { id: 'am_inc_dmg', label: '% Increased Damage', keywords: ['increased', 'damage'], weight: 2.5 },
@@ -151,10 +153,20 @@ const POE2_CONTEXTUAL_DATABASE = {
       { id: 'am_lightning_dmg', label: '% Increased Lightning Damage', keywords: ['increased', 'lightning', 'damage'], weight: 2.0 },
       { id: 'am_chaos_dmg', label: '% Increased Chaos Damage', keywords: ['increased', 'chaos', 'damage'], weight: 2.5 },
       { id: 'am_spell_dmg', label: '% Increased Spell Damage', keywords: ['increased', 'spell', 'damage'], weight: 2.5 },
+      { id: 'am_spell_dmg_shield', label: '% Increased Spell Damage while holding a Shield', keywords: ['increased', 'spell', 'damage', 'holding', 'shield'], weight: 2.5 },
       { id: 'am_add_phys', label: 'Adds Physical Damage to Attacks', keywords: ['adds', 'physical', 'damage', 'attacks'], weight: 2.5 },
       { id: 'am_add_fire', label: 'Adds Fire Damage to Attacks', keywords: ['adds', 'fire', 'damage', 'attacks'], weight: 2.0 },
       { id: 'am_add_cold', label: 'Adds Cold Damage to Attacks', keywords: ['adds', 'cold', 'damage', 'attacks'], weight: 2.0 },
-      { id: 'am_add_lightning', label: 'Adds Lightning Damage to Attacks', keywords: ['adds', 'lightning', 'damage', 'attacks'], weight: 2.0 }
+      { id: 'am_add_lightning', label: 'Adds Lightning Damage to Attacks', keywords: ['adds', 'lightning', 'damage', 'attacks'], weight: 2.0 },
+      { id: 'am_crit_chance_cold', label: '% Increased Critical Strike Chance with Cold Skills', keywords: ['increased', 'critical', 'strike', 'chance', 'cold', 'skills'], weight: 2.5 },
+      { id: 'am_crit_mult_cold', label: '% Increased Critical Strike Multiplier with Cold Skills', keywords: ['increased', 'critical', 'strike', 'multiplier', 'cold', 'skills'], weight: 3.0 },
+      { id: 'am_crit_chance_fire', label: '% Increased Critical Strike Chance with Fire Skills', keywords: ['increased', 'critical', 'strike', 'chance', 'fire', 'skills'], weight: 2.5 },
+      { id: 'am_crit_mult_fire', label: '% Increased Critical Strike Multiplier with Fire Skills', keywords: ['increased', 'critical', 'strike', 'multiplier', 'fire', 'skills'], weight: 3.0 },
+      { id: 'am_crit_chance_lightning', label: '% Increased Critical Strike Chance with Lightning Skills', keywords: ['increased', 'critical', 'strike', 'chance', 'lightning', 'skills'], weight: 2.5 },
+      { id: 'am_crit_mult_lightning', label: '% Increased Critical Strike Multiplier with Lightning Skills', keywords: ['increased', 'critical', 'strike', 'multiplier', 'lightning', 'skills'], weight: 3.0 },
+      { id: 'am_atk_speed_shield', label: '% Increased Attack Speed while holding a Shield', keywords: ['increased', 'attack', 'speed', 'holding', 'shield'], weight: 2.8 },
+      { id: 'am_atk_speed_onehand', label: '% Increased Attack Speed with One Handed Melee Weapons', keywords: ['increased', 'attack', 'speed', 'one', 'handed', 'melee'], weight: 2.8 },
+      { id: 'am_crit_chance_onehand', label: '% Increased Critical Strike Chance with One Handed Melee Weapons', keywords: ['increased', 'critical', 'strike', 'chance', 'one', 'handed', 'melee'], weight: 2.5 }
     ],
     valuable_explicits: [
       { id: 'skills_all', label: 'Levels to All Skills', keywords: ['levels', 'all', 'skills'], weight: 6.0 },
@@ -260,7 +272,7 @@ function initActionListeners() {
 
           try {
             const res = await Tesseract.recognize(processedDataUrl, 'eng', {
-              tessedit_char_whitelist: '0123456789+- %abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-:',
+              tessedit_char_whitelist: '0123456789+- %abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-:(,)',
               tessedit_pageseg_mode: '6' 
             });
             processContextualTokens(res.data.text, targetPrefix);
@@ -291,15 +303,58 @@ function filterBackgroundNoise(imageElement) {
   const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const pixels = imgData.data;
 
+  // Step 1: Convert to Grayscale using digital ITU-R luminance weights
+  const grayscale = new Uint8Array(pixels.length / 4);
   for (let i = 0; i < pixels.length; i += 4) {
-    const r = pixels[i];
-    const g = pixels[i + 1];
-    const b = pixels[i + 2];
+    grayscale[i / 4] = 0.299 * pixels[i] + 0.587 * pixels[i + 1] + 0.114 * pixels[i + 2];
+  }
 
-    const matchesFontProfile = (r > 130 && g > 115 && b > 85) || (b > 175 && r < 115) || (r > 180 && g > 170 && b > 150);
+  // Step 2: Compute Otsu's Global Adaptive Thresholding
+  let histogram = new Array(256).fill(0);
+  for (let i = 0; i < grayscale.length; i++) {
+    histogram[grayscale[i]]++;
+  }
 
-    const binaryValue = matchesFontProfile ? 255 : 0;
-    pixels[i] = pixels[i + 1] = pixels[i + 2] = binaryValue; 
+  let totalPixels = grayscale.length;
+  let sum = 0;
+  for (let t = 0; t < 256; t++) sum += t * histogram[t];
+
+  let sumB = 0;
+  let wB = 0;
+  let wF = 0;
+  let varMax = 0;
+  let threshold = 120; // Default fallback threshold
+
+  for (let t = 0; t < 256; t++) {
+    wB += histogram[t];
+    if (wB === 0) continue;
+
+    wF = totalPixels - wB;
+    if (wF === 0) break;
+
+    sumB += t * histogram[t];
+
+    let mB = sumB / wB;
+    let mF = (sum - sumB) / wF;
+
+    let varBetween = wB * wF * (mB - mF) * (mB - mF);
+
+    if (varBetween > varMax) {
+      varMax = varBetween;
+      threshold = t;
+    }
+  }
+
+  // Step 3: Apply optimal adaptive threshold mask to binary pixels (White text on black canvas)
+  const targetThreshold = threshold * 0.9; 
+
+  for (let i = 0; i < pixels.length; i += 4) {
+    const monoIntensity = grayscale[i / 4];
+    const binaryColor = monoIntensity > targetThreshold ? 255 : 0;
+
+    pixels[i]     = binaryColor; 
+    pixels[i + 1] = binaryColor; 
+    pixels[i + 2] = binaryColor; 
   }
 
   ctx.putImageData(imgData, 0, 0);
@@ -311,27 +366,53 @@ function processContextualTokens(rawText, prefix) {
   const activePool = POE2_CONTEXTUAL_DATABASE[currentContext];
 
   lines.forEach(line => {
-    const numbersFound = line.match(/(\d+)/g);
-    if (!numbersFound) return;
+    // 1. ANCHOR DETECTION: Look for numerical properties first
+    const cleanLine = line.replace(/\(\s*(\d+)\s*[-➔to]+\s*(\d+)\s*\)/g, '$2'); 
+    const numbersFound = cleanLine.match(/(\d+)/g);
+    
+    if (!numbersFound) return; 
+
+    const extractedStat = numbersFound.length > 1 
+      ? Math.max(...numbersFound.map(Number)) 
+      : parseInt(numbersFound[0], 10);
+
+    // 2. FEATURE MAPPING: Isolate pure alphabetical attribute descriptors
+    const attributeTextOnly = cleanLine.replace(/[\d\+\%\-\(\)]/g, '').trim();
+    
+    // 3. FUZZY MATCHING MATRIX
+    let bestMatch = null;
+    let highestHitRatio = 0.0;
 
     Object.keys(activePool).forEach(cat => {
       activePool[cat].forEach(mod => {
         let keywordHits = 0;
         
         mod.keywords.forEach(word => {
-          if (line.includes(word) || computeLevenshteinDistance(line, word) < 2) {
+          if (attributeTextOnly.includes(word) || computeLevenshteinDistance(attributeTextOnly, word) < 2) {
             keywordHits++;
           }
         });
 
-        if (keywordHits >= Math.ceil(mod.keywords.length * 0.7)) {
-          const uiTargetNode = document.getElementById(`${prefix}_${mod.id}`);
-          if (uiTargetNode) {
-            uiTargetNode.value = parseInt(numbersFound[0], 10);
-          }
+        const hitRatio = keywordHits / mod.keywords.length;
+
+        if (hitRatio >= 0.65 && hitRatio > highestHitRatio) {
+          highestHitRatio = hitRatio;
+          bestMatch = mod;
         }
       });
     });
+
+    // 4. INPUT LOCK-ON
+    if (bestMatch) {
+      const uiTargetNode = document.getElementById(`${prefix}_${bestMatch.id}`);
+      if (uiTargetNode) {
+        const currentUiVal = parseInt(uiTargetNode.value, 10) || 0;
+        uiTargetNode.value = Math.max(currentUiVal, extractedStat);
+        
+        uiTargetNode.classList.add('scan-success-flash');
+        setTimeout(() => uiTargetNode.classList.remove('scan-success-flash'), 600);
+      }
+    }
   });
 }
 
@@ -367,8 +448,11 @@ function runComparisonEngine() {
 
   Object.keys(activePool).forEach(cat => {
     activePool[cat].forEach(mod => {
-      const valA = parseFloat(document.getElementById(`panelA_${mod.id}`).value) || 0;
-      const valB = parseFloat(document.getElementById(`panelB_${mod.id}`).value) || 0;
+      const nodeA = document.getElementById(`panelA_${mod.id}`);
+      const nodeB = document.getElementById(`panelB_${mod.id}`);
+      
+      const valA = nodeA ? parseFloat(nodeA.value) || 0 : 0;
+      const valB = nodeB ? parseFloat(nodeB.value) || 0 : 0;
 
       if (valA !== 0 || valB !== 0) {
         scoreA += valA * mod.weight;
@@ -385,17 +469,15 @@ function displayAnalysis(sA, sB, metrics) {
   const wrapper = document.getElementById('resultsSection');
   const inner = document.getElementById('resultsInner');
   
-  // Calculate true upgrade/downgrade percentage relative to Equipped baseline
   let totalShift = 0;
   if (sA > 0) {
     totalShift = ((sB - sA) / sA) * 100;
   } else if (sB > 0) {
-    totalShift = 100; // Moving out of an empty gear slot scenario
+    totalShift = 100; 
   }
 
   const pctClass = totalShift >= 0 ? 'positive' : 'negative';
   
-  // Custom Upgrade Appraisal Engine
   let verdictTitle = "EQUIVOCAL EXCHANGE";
   let verdictDescription = "The item has identical calculated weights or holds zero metrics.";
   
