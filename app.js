@@ -1,5 +1,5 @@
 /**
- * EXILE'S LENS — Item Upgrade Compare Tool 
+ * EXILE'S LENS — Core Execution Logic with Upgrade Diagnostics
  */
 
 const POE2_CONTEXTUAL_DATABASE = {
@@ -102,6 +102,18 @@ const POE2_CONTEXTUAL_DATABASE = {
       { id: 'gold_rarity', label: 'Gold Ring Base (Item Rarity)', keywords: ['rarity', 'found'], weight: 2.0 },
       { id: 'unset_slot', label: 'Unset Ring Base (Extra Skill Slot)', keywords: ['unset', 'skill', 'slot'], weight: 5.0 }
     ],
+    damage_modifiers: [
+      { id: 'ring_add_phys', label: 'Adds Physical Damage to Attacks', keywords: ['adds', 'physical', 'damage', 'attacks'], weight: 2.5 },
+      { id: 'ring_add_fire', label: 'Adds Fire Damage to Attacks', keywords: ['adds', 'fire', 'damage', 'attacks'], weight: 2.0 },
+      { id: 'ring_add_cold', label: 'Adds Cold Damage to Attacks', keywords: ['adds', 'cold', 'damage', 'attacks'], weight: 2.0 },
+      { id: 'ring_add_lightning', label: 'Adds Lightning Damage to Attacks', keywords: ['adds', 'lightning', 'damage', 'attacks'], weight: 2.0 },
+      { id: 'ring_add_chaos', label: 'Adds Chaos Damage to Attacks', keywords: ['adds', 'chaos', 'damage', 'attacks'], weight: 2.5 },
+      { id: 'ring_inc_dmg', label: '% Increased Damage', keywords: ['increased', 'damage'], weight: 2.2 },
+      { id: 'ring_inc_ele_dmg', label: '% Increased Elemental Damage with Attack Skills', keywords: ['increased', 'elemental', 'damage'], weight: 2.2 },
+      { id: 'ring_fire_dmg', label: '% Increased Fire Damage', keywords: ['increased', 'fire', 'damage'], weight: 2.0 },
+      { id: 'ring_cold_dmg', label: '% Increased Cold Damage', keywords: ['increased', 'cold', 'damage'], weight: 2.0 },
+      { id: 'ring_lightning_dmg', label: '% Increased Lightning Damage', keywords: ['increased', 'lightning', 'damage'], weight: 2.0 }
+    ],
     explicits: [
       { id: 'max_life', label: 'Maximum Life', keywords: ['maximum', 'life'], weight: 2.5 },
       { id: 'max_mana', label: 'Maximum Mana', keywords: ['maximum', 'mana'], weight: 1.5 },
@@ -131,6 +143,19 @@ const POE2_CONTEXTUAL_DATABASE = {
       { id: 'imp_mana_regen', label: 'Amulet Base: Mana Regeneration', keywords: ['mana', 'regeneration'], weight: 1.5 },
       { id: 'imp_es_bonus', label: 'Amulet Base: Energy Shield', keywords: ['energy', 'shield'], weight: 1.5 }
     ],
+    damage_modifiers: [
+      { id: 'am_inc_dmg', label: '% Increased Damage', keywords: ['increased', 'damage'], weight: 2.5 },
+      { id: 'am_inc_ele_dmg', label: '% Increased Elemental Damage', keywords: ['increased', 'elemental', 'damage'], weight: 2.2 },
+      { id: 'am_fire_dmg', label: '% Increased Fire Damage', keywords: ['increased', 'fire', 'damage'], weight: 2.0 },
+      { id: 'am_cold_dmg', label: '% Increased Cold Damage', keywords: ['increased', 'cold', 'damage'], weight: 2.0 },
+      { id: 'am_lightning_dmg', label: '% Increased Lightning Damage', keywords: ['increased', 'lightning', 'damage'], weight: 2.0 },
+      { id: 'am_chaos_dmg', label: '% Increased Chaos Damage', keywords: ['increased', 'chaos', 'damage'], weight: 2.5 },
+      { id: 'am_spell_dmg', label: '% Increased Spell Damage', keywords: ['increased', 'spell', 'damage'], weight: 2.5 },
+      { id: 'am_add_phys', label: 'Adds Physical Damage to Attacks', keywords: ['adds', 'physical', 'damage', 'attacks'], weight: 2.5 },
+      { id: 'am_add_fire', label: 'Adds Fire Damage to Attacks', keywords: ['adds', 'fire', 'damage', 'attacks'], weight: 2.0 },
+      { id: 'am_add_cold', label: 'Adds Cold Damage to Attacks', keywords: ['adds', 'cold', 'damage', 'attacks'], weight: 2.0 },
+      { id: 'am_add_lightning', label: 'Adds Lightning Damage to Attacks', keywords: ['adds', 'lightning', 'damage', 'attacks'], weight: 2.0 }
+    ],
     valuable_explicits: [
       { id: 'skills_all', label: 'Levels to All Skills', keywords: ['levels', 'all', 'skills'], weight: 6.0 },
       { id: 'skills_spell', label: 'Levels to Spell Skills', keywords: ['levels', 'spell', 'skills'], weight: 5.0 },
@@ -143,6 +168,12 @@ const POE2_CONTEXTUAL_DATABASE = {
       { id: 'glob_crit_mult', label: 'Global Critical Strike Multiplier', keywords: ['global', 'critical', 'multiplier'], weight: 3.0 },
       { id: 'rarity_found', label: '% Increased Rarity of Items Found', keywords: ['rarity', 'found'], weight: 1.5 },
       { id: 'spirit', label: 'Spirit', keywords: ['spirit'], weight: 4.5 }
+    ],
+    core_attributes: [
+      { id: 'strength', label: 'Strength', keywords: ['strength'], weight: 1.5 },
+      { id: 'dexterity', label: 'Dexterity', keywords: ['dexterity'], weight: 1.5 },
+      { id: 'intelligence', label: 'Intelligence', keywords: ['intelligence'], weight: 1.5 },
+      { id: 'all_stats', label: 'All Attributes', keywords: ['all', 'attributes'], weight: 4.5 }
     ]
   }
 };
@@ -272,7 +303,7 @@ function filterBackgroundNoise(imageElement) {
   }
 
   ctx.putImageData(imgData, 0, 0);
-  return canvas.toToDataURL('image/png');
+  return canvas.toDataURL('image/png');
 }
 
 function processContextualTokens(rawText, prefix) {
