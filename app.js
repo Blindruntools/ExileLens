@@ -1,6 +1,6 @@
 /**
- * EXILE'S LENS — Core Execution Logic
- * Features: Otsu Adaptive Binarization & Layout-Aware Token Anchor Matching
+ * EXILE'S LENS — Spatial Segmentation Architecture
+ * Features: Automatic Item Card Bounding, Divider Y-Axis Indexing, 3x Font Scaling & Layout-Aware Token Anchor Matching
  */
 
 const POE2_CONTEXTUAL_DATABASE = {
@@ -203,10 +203,8 @@ function setupContextTabs() {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
-      
       currentContext = tab.getAttribute('data-type');
       rebuildContextualPanels();
-      
       document.getElementById('resultsSection').classList.remove('visible');
     });
   });
@@ -220,7 +218,6 @@ function rebuildContextualPanels() {
 function renderActiveMenu(containerId, prefix) {
   const target = document.getElementById(containerId);
   target.innerHTML = '';
-
   const activePool = POE2_CONTEXTUAL_DATABASE[currentContext];
 
   Object.keys(activePool).forEach(cat => {
@@ -261,23 +258,27 @@ function initActionListeners() {
       if (!file) return;
       const targetPrefix = input.id.includes('itemAFile') ? 'panelA' : 'panelB';
       const indicator = input.previousElementSibling;
-      indicator.innerText = '⏳ SHARPENING FILTERS...';
+      indicator.innerText = '🛰️ SEGMENTING CARD ZONES...';
 
       const reader = new FileReader();
       reader.onload = function(event) {
         const img = new Image();
         img.onload = async function() {
-          const processedDataUrl = filterBackgroundNoise(img);
-          indicator.innerText = '🔮 RUNNING LEXER...';
-
           try {
-            const res = await Tesseract.recognize(processedDataUrl, 'eng', {
-              tessedit_char_whitelist: '0123456789+- %abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-:(,)',
-              tessedit_pageseg_mode: '6' 
-            });
-            processContextualTokens(res.data.text, targetPrefix);
+            // Segment the raw screenshot image into targeted sub-canvases
+            const zones = segmentItemCardZones(img);
+            indicator.innerText = '🔮 PROCESSING TEXT MATRIX...';
+
+            if (zones.implicit) {
+              const textImp = await recognizeCanvasZone(zones.implicit);
+              processContextualTokens(textImp, targetPrefix);
+            }
+            if (zones.explicit) {
+              const textExp = await recognizeCanvasZone(zones.explicit);
+              processContextualTokens(textExp, targetPrefix);
+            }
           } catch (err) {
-            console.error("OCR Failure Exception: ", err);
+            console.error("Spatial Scan Exception: ", err);
           } finally {
             indicator.innerText = '📸 SCAN IMAGE';
           }
@@ -293,50 +294,124 @@ function initActionListeners() {
   document.getElementById('compareBtn').addEventListener('click', runComparisonEngine);
 }
 
-function filterBackgroundNoise(imageElement) {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = imageElement.naturalWidth;
-  canvas.height = imageElement.naturalHeight;
-  ctx.drawImage(imageElement, 0, 0);
+/**
+ * Parses a canvas element through Tesseract OCR using tight character parameters
+ */
+async function recognizeCanvasZone(canvas) {
+  const dataUrl = canvas.toDataURL('image/png');
+  const res = await Tesseract.recognize(dataUrl, 'eng', {
+    tessedit_char_whitelist: '0123456789+- %abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-:(,)',
+    tessedit_pageseg_mode: '6'
+  });
+  return res.data.text;
+}
 
-  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+/**
+ * Locates the bounding box of the card and isolates explicit and implicit horizontal fields
+ */
+function segmentItemCardZones(imageElement) {
+  const rawCanvas = document.createElement('canvas');
+  const rawCtx = rawCanvas.getContext('2d');
+  rawCanvas.width = imageElement.naturalWidth;
+  rawCanvas.height = imageElement.naturalHeight;
+  rawCtx.drawImage(imageElement, 0, 0);
+
+  const imgData = rawCtx.getImageData(0, 0, rawCanvas.width, rawCanvas.height);
+  const pixels = imgData.data;
+  const width = rawCanvas.width;
+  const height = rawCanvas.height;
+
+  // Step 1: Scan vertical rows to locate Dark UI Card divider bars
+  let dividerYCoordinates = [];
+  
+  for (let y = 10; y < height - 10; y++) {
+    let continuousDarkCount = 0;
+    for (let x = Math.floor(width * 0.3); x < Math.floor(width * 0.7); x++) {
+      const idx = (y * width + x) * 4;
+      const r = pixels[idx];
+      const g = pixels[idx + 1];
+      const b = pixels[idx + 2];
+      
+      // Match PoE UI dark divider graphics (low values, dark grey/brown subtle border shades)
+      if (r < 45 && g < 40 && b < 35 && r > 10) {
+        continuousDarkCount++;
+      }
+    }
+    
+    // Check if the match spans across the visual center area of the frame
+    if (continuousDarkCount > (width * 0.35)) {
+      if (dividerYCoordinates.length === 0 || y - dividerYCoordinates[dividerYCoordinates.length - 1] > 15) {
+        dividerYCoordinates.push(y);
+      }
+    }
+  }
+
+  // Fallback defaults if screenshot doesn't hit line thresholds natively
+  if (dividerYCoordinates.length === 0) {
+    dividerYCoordinates = [Math.floor(height * 0.35), Math.floor(height * 0.55)];
+  } else if (dividerYCoordinates.length === 1) {
+    dividerYCoordinates.push(Math.floor(height * 0.6));
+  }
+
+  // Sort coordinate map top-to-bottom
+  dividerYCoordinates.sort((a, b) => a - b);
+
+  // Step 2: Establish crop boundaries based on indexed dividers
+  const yTopDivider = dividerYCoordinates[0];
+  const yBottomDivider = dividerYCoordinates[1];
+
+  return {
+    implicit: scaleAndBinarizeZone(rawCanvas, 0, yTopDivider, width, (yBottomDivider - yTopDivider)),
+    explicit: scaleAndBinarizeZone(rawCanvas, 0, yBottomDivider, width, (height - yBottomDivider))
+  };
+}
+
+/**
+ * Cuts a sub-region, stretches its geometry by 3x to thicken web text, and applies an Otsu Filter mask
+ */
+function scaleAndBinarizeZone(sourceCanvas, x, y, w, h) {
+  if (h <= 0 || w <= 0) return null;
+
+  const targetScale = 3; 
+  const outCanvas = document.createElement('canvas');
+  const outCtx = outCanvas.getContext('2d');
+  
+  outCanvas.width = w * targetScale;
+  outCanvas.height = h * targetScale;
+
+  // Bilinear resizing step
+  outCtx.imageSmoothingEnabled = true;
+  outCtx.imageSmoothingQuality = 'high';
+  outCtx.drawImage(sourceCanvas, x, y, w, h, 0, 0, outCanvas.width, outCanvas.height);
+
+  const imgData = outCtx.getImageData(0, 0, outCanvas.width, outCanvas.height);
   const pixels = imgData.data;
 
-  // Step 1: Convert to Grayscale using digital ITU-R luminance weights
+  // Convert to highly accurate grayscale block
   const grayscale = new Uint8Array(pixels.length / 4);
   for (let i = 0; i < pixels.length; i += 4) {
     grayscale[i / 4] = 0.299 * pixels[i] + 0.587 * pixels[i + 1] + 0.114 * pixels[i + 2];
   }
 
-  // Step 2: Compute Otsu's Global Adaptive Thresholding
+  // Run Otsu Adaptive Threshold calculation inside this specific sub-window bounds
   let histogram = new Array(256).fill(0);
-  for (let i = 0; i < grayscale.length; i++) {
-    histogram[grayscale[i]]++;
-  }
+  for (let i = 0; i < grayscale.length; i++) histogram[grayscale[i]]++;
 
   let totalPixels = grayscale.length;
   let sum = 0;
   for (let t = 0; t < 256; t++) sum += t * histogram[t];
 
-  let sumB = 0;
-  let wB = 0;
-  let wF = 0;
-  let varMax = 0;
-  let threshold = 120; // Default fallback threshold
+  let sumB = 0, wB = 0, wF = 0, varMax = 0, threshold = 125;
 
   for (let t = 0; t < 256; t++) {
     wB += histogram[t];
     if (wB === 0) continue;
-
     wF = totalPixels - wB;
     if (wF === 0) break;
 
     sumB += t * histogram[t];
-
     let mB = sumB / wB;
     let mF = (sum - sumB) / wF;
-
     let varBetween = wB * wF * (mB - mF) * (mB - mF);
 
     if (varBetween > varMax) {
@@ -345,20 +420,18 @@ function filterBackgroundNoise(imageElement) {
     }
   }
 
-  // Step 3: Apply optimal adaptive threshold mask to binary pixels (White text on black canvas)
-  const targetThreshold = threshold * 0.9; 
-
+  // Pure binary mask generation (optimized to preserve blue/cyan text layers)
+  const targetThreshold = threshold * 0.85;
   for (let i = 0; i < pixels.length; i += 4) {
-    const monoIntensity = grayscale[i / 4];
-    const binaryColor = monoIntensity > targetThreshold ? 255 : 0;
-
-    pixels[i]     = binaryColor; 
-    pixels[i + 1] = binaryColor; 
-    pixels[i + 2] = binaryColor; 
+    const intensity = grayscale[i / 4];
+    const binary = intensity > targetThreshold ? 255 : 0;
+    pixels[i]     = binary;
+    pixels[i + 1] = binary;
+    pixels[i + 2] = binary;
   }
 
-  ctx.putImageData(imgData, 0, 0);
-  return canvas.toDataURL('image/png');
+  outCtx.putImageData(imgData, 0, 0);
+  return outCanvas;
 }
 
 function processContextualTokens(rawText, prefix) {
@@ -366,7 +439,7 @@ function processContextualTokens(rawText, prefix) {
   const activePool = POE2_CONTEXTUAL_DATABASE[currentContext];
 
   lines.forEach(line => {
-    // 1. ANCHOR DETECTION: Look for numerical properties first
+    // 1. ANCHOR DETECTION: Identify values and collapse trade formatting parentheticals like "(10-15)"
     const cleanLine = line.replace(/\(\s*(\d+)\s*[-➔to]+\s*(\d+)\s*\)/g, '$2'); 
     const numbersFound = cleanLine.match(/(\d+)/g);
     
@@ -376,10 +449,10 @@ function processContextualTokens(rawText, prefix) {
       ? Math.max(...numbersFound.map(Number)) 
       : parseInt(numbersFound[0], 10);
 
-    // 2. FEATURE MAPPING: Isolate pure alphabetical attribute descriptors
+    // 2. FEATURE MAPPING: Strip values out entirely to isolate structural words
     const attributeTextOnly = cleanLine.replace(/[\d\+\%\-\(\)]/g, '').trim();
     
-    // 3. FUZZY MATCHING MATRIX
+    // 3. CONFIDENCE SCORING MATRIX
     let bestMatch = null;
     let highestHitRatio = 0.0;
 
@@ -402,7 +475,7 @@ function processContextualTokens(rawText, prefix) {
       });
     });
 
-    // 4. INPUT LOCK-ON
+    // 4. UI SEEDED INJECTION
     if (bestMatch) {
       const uiTargetNode = document.getElementById(`${prefix}_${bestMatch.id}`);
       if (uiTargetNode) {
