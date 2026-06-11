@@ -1,5 +1,5 @@
 /**
- * EXILE'S LENS — Complete Comprehensive PoE2 Stat Scanner Matrix
+ * EXILE'S LENS — Item Upgrade Compare Tool 
  */
 
 const POE2_CONTEXTUAL_DATABASE = {
@@ -216,7 +216,7 @@ function initActionListeners() {
     input.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      const targetPrefix = input.id.includes('itemA') ? 'panelA' : 'panelB';
+      const targetPrefix = input.id.includes('itemAFile') ? 'panelA' : 'panelB';
       const indicator = input.previousElementSibling;
       indicator.innerText = '⏳ SHARPENING FILTERS...';
 
@@ -272,7 +272,7 @@ function filterBackgroundNoise(imageElement) {
   }
 
   ctx.putImageData(imgData, 0, 0);
-  return canvas.toDataURL('image/png');
+  return canvas.toToDataURL('image/png');
 }
 
 function processContextualTokens(rawText, prefix) {
@@ -354,18 +354,40 @@ function displayAnalysis(sA, sB, metrics) {
   const wrapper = document.getElementById('resultsSection');
   const inner = document.getElementById('resultsInner');
   
-  const totalShift = sA === 0 ? sB * 100 : ((sB - sA) / sA) * 100;
+  // Calculate true upgrade/downgrade percentage relative to Equipped baseline
+  let totalShift = 0;
+  if (sA > 0) {
+    totalShift = ((sB - sA) / sA) * 100;
+  } else if (sB > 0) {
+    totalShift = 100; // Moving out of an empty gear slot scenario
+  }
+
   const pctClass = totalShift >= 0 ? 'positive' : 'negative';
+  
+  // Custom Upgrade Appraisal Engine
+  let verdictTitle = "EQUIVOCAL EXCHANGE";
+  let verdictDescription = "The item has identical calculated weights or holds zero metrics.";
+  
+  if (totalShift > 15) {
+    verdictTitle = "🚨 DEFINITE UPGRADE";
+    verdictDescription = "This item yields a massive increase to your baseline weights. Swap it out immediately.";
+  } else if (totalShift > 0) {
+    verdictTitle = "MINIMAL UPGRADE";
+    verdictDescription = "Slight stat increase. Make sure your build doesn't rely heavily on specific resistance thresholds before breaking current sets.";
+  } else if (totalShift < 0) {
+    verdictTitle = "❌ DOWNGRADE DETECTED";
+    verdictDescription = "Equipping this item drops your net weight. Keep your current gear active or salvage this drop.";
+  }
 
   inner.innerHTML = `
-    <div class="verdict-banner" style="border-left: 4px solid var(--gold);">
+    <div class="verdict-banner">
       <div>
-        <div class="verdict-label">Evaluation Complete [${currentContext.toUpperCase()}]</div>
-        <div class="verdict-desc">Computed matching weights using category targets.</div>
+        <div class="verdict-label" style="color: ${totalShift > 0 ? 'var(--green-bright)' : totalShift < 0 ? 'var(--red-accent)' : 'var(--gold)'}">${verdictTitle}</div>
+        <div class="verdict-desc">${verdictDescription}</div>
       </div>
       <div class="verdict-diff">
         <div class="diff-pct ${pctClass}">${totalShift >= 0 ? '+' : ''}${totalShift.toFixed(1)}%</div>
-        <div class="diff-label">Weight Differential</div>
+        <div class="diff-label">Upgrade Differential</div>
       </div>
     </div>
     <div class="score-card">
@@ -373,7 +395,7 @@ function displayAnalysis(sA, sB, metrics) {
         ${metrics.map(m => `
           <div class="breakdown-row">
             <span class="breakdown-stat">${m.label}</span>
-            <span class="breakdown-val">${m.a} ➔ ${m.b}</span>
+            <span class="breakdown-val"><span>${m.a}</span> ➔ <span>${m.b}</span></span>
           </div>
         `).join('')}
       </div>
