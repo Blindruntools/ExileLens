@@ -358,3 +358,23 @@ header p {
 .breakdown-stat { color: var(--text-main); }
 .breakdown-val { font-family: monospace; font-weight: 600; color: var(--text-muted); }
 .breakdown-val span { color: var(--gold); }
+
+/* --- FIX ADDITIONS FOR HYBRID OVERRIDES --- */
+
+/* Scan Success Visual Flash Feedback */
+.scan-success-flash {
+  background-color: var(--green-glow) !important;
+  border-color: var(--green-bright) !important;
+  box-shadow: 0 0 8px var(--green-glow);
+  transition: all 0.2s ease;
+}
+
+/* Clear out clunky browser arrow spinners on manual number input fields */
+.row-controls input::-webkit-outer-spin-button,
+.row-controls input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.row-controls input[type=number] {
+  -moz-appearance: textfield;
+}
